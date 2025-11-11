@@ -64,6 +64,12 @@ export async function POST(request: NextRequest) {
       fewShotCount: settings.fewShotCount ?? 0,
       systemMessageEnabled: settings.systemMessageEnabled ?? false,
       customSystemMessage: settings.customSystemMessage ?? "",
+      learningModeEnabled: settings.learningModeEnabled ?? false,
+      showTooltips: settings.showTooltips ?? true,
+      showWhyBadges: settings.showWhyBadges ?? true,
+      showPrinciplesSidebar: settings.showPrinciplesSidebar ?? true,
+      showRealTimeTips: settings.showRealTimeTips ?? true,
+      tipFrequency: (settings.tipFrequency as any) ?? "medium",
     };
 
     // Perform initial prompt analysis

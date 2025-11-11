@@ -10,6 +10,13 @@ const defaultSettings: UserSettings = {
   fewShotCount: 0,
   systemMessageEnabled: false,
   customSystemMessage: "",
+  // Educational Mode defaults
+  learningModeEnabled: false,
+  showTooltips: true,
+  showWhyBadges: true,
+  showPrinciplesSidebar: true,
+  showRealTimeTips: true,
+  tipFrequency: "medium",
 };
 
 const defaultQualityScores: QualityScores = {
