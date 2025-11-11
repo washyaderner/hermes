@@ -13,7 +13,7 @@ import { ControlPanel } from "@/components/prompt/ControlPanel";
 import { DatasetManager } from "@/components/prompt/DatasetManager";
 import { useHermesStore, createPromptHash } from "@/lib/store";
 import { analyzePrompt } from "@/lib/prompt-engine/analyzer";
-import { Platform, SuccessfulPromptPattern, Tone } from "@/types";
+import { Platform, SuccessfulPromptPattern, Tone, PromptHistoryItem } from "@/types";
 import { generateId } from "@/lib/utils";
 
 export default function DashboardPage() {
@@ -36,6 +36,8 @@ export default function DashboardPage() {
     successfulPromptPatterns,
     addSuccessfulPromptPattern,
     getUserPreferenceWeighting,
+    addPromptHistoryItem,
+    loadPromptHistoryFromStorage,
   } = useHermesStore();
 
   const [platforms, setPlatforms] = useState<Platform[]>([]);
@@ -61,7 +63,10 @@ export default function DashboardPage() {
 
     // Load successful patterns from localStorage
     loadSuccessfulPatternsFromStorage();
-  }, [loadDatasetsFromStorage, loadSuccessfulPatternsFromStorage]);
+
+    // Load prompt history from localStorage
+    loadPromptHistoryFromStorage();
+  }, [loadDatasetsFromStorage, loadSuccessfulPatternsFromStorage, loadPromptHistoryFromStorage]);
 
   // Analyze prompt in real-time
   useEffect(() => {
@@ -137,6 +142,17 @@ export default function DashboardPage() {
         });
 
         setEnhancedPrompts(data.enhancedPrompts);
+
+        // Save to history
+        const historyItem: PromptHistoryItem = {
+          promptId: generateId(),
+          originalText: currentPrompt,
+          enhancedVersions: data.enhancedPrompts,
+          platform: selectedPlatform,
+          timestamp: new Date(),
+          wasSuccessful: false,
+        };
+        addPromptHistoryItem(historyItem);
 
         // Calculate average output quality
         const avgQuality =

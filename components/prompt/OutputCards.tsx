@@ -2,10 +2,11 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { QualityMeter } from "./QualityMeter";
-import { copyToClipboard } from "@/lib/utils";
+import { copyToClipboard, generateId } from "@/lib/utils";
 import { useState } from "react";
-import { EnhancedPrompt } from "@/types";
+import { EnhancedPrompt, SavedTemplate } from "@/types";
 import { useHermesStore } from "@/lib/store";
 
 interface OutputCardsProps {
@@ -16,7 +17,10 @@ export function OutputCards({ prompts }: OutputCardsProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [markedSuccessfulIds, setMarkedSuccessfulIds] = useState<Set<string>>(new Set());
-  const { trackPromptSuccess, getUserPreferenceWeighting, settings } = useHermesStore();
+  const [showSaveTemplateId, setShowSaveTemplateId] = useState<string | null>(null);
+  const [templateName, setTemplateName] = useState("");
+  const [templateCategory, setTemplateCategory] = useState("General");
+  const { trackPromptSuccess, getUserPreferenceWeighting, settings, addSavedTemplate } = useHermesStore();
 
   const handleCopy = async (text: string, id: string) => {
     const success = await copyToClipboard(text);
@@ -31,6 +35,29 @@ export function OutputCards({ prompts }: OutputCardsProps) {
   const handleMarkSuccessful = (id: string) => {
     trackPromptSuccess(id, "marked_successful");
     setMarkedSuccessfulIds((prev) => new Set(prev).add(id));
+  };
+
+  const handleSaveAsTemplate = (prompt: EnhancedPrompt) => {
+    if (!templateName.trim()) {
+      alert("Please enter a template name");
+      return;
+    }
+
+    const template: SavedTemplate = {
+      templateId: generateId(),
+      templateName: templateName.trim(),
+      promptText: prompt.enhanced,
+      platform: prompt.platform,
+      settings: settings,
+      category: templateCategory,
+      createdAt: new Date(),
+    };
+
+    addSavedTemplate(template);
+    setShowSaveTemplateId(null);
+    setTemplateName("");
+    setTemplateCategory("General");
+    alert("Template \"" + template.templateName + "\" saved successfully!");
   };
 
   if (prompts.length === 0) {
@@ -171,6 +198,38 @@ export function OutputCards({ prompts }: OutputCardsProps) {
                   {markedSuccessfulIds.has(prompt.id) ? "✓ Marked!" : "⭐ Mark Successful"}
                 </Button>
               </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="w-full"
+                onClick={() => setShowSaveTemplateId(showSaveTemplateId === prompt.id ? null : prompt.id)}
+              >
+                {showSaveTemplateId === prompt.id ? "Cancel" : "💾 Save as Template"}
+              </Button>
+
+              {showSaveTemplateId === prompt.id && (
+                <div className="space-y-2 p-3 bg-surface/50 rounded-md border border-border">
+                  <Input
+                    placeholder="Template name"
+                    value={templateName}
+                    onChange={(e) => setTemplateName(e.target.value)}
+                    className="text-sm"
+                  />
+                  <Input
+                    placeholder="Category (e.g., Marketing, Code, Analysis)"
+                    value={templateCategory}
+                    onChange={(e) => setTemplateCategory(e.target.value)}
+                    className="text-sm"
+                  />
+                  <Button
+                    size="sm"
+                    className="w-full"
+                    onClick={() => handleSaveAsTemplate(prompt)}
+                  >
+                    Save Template
+                  </Button>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

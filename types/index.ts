@@ -93,6 +93,15 @@ export interface HistoryItem {
   isFavorite: boolean;
 }
 
+export interface PromptHistoryItem {
+  promptId: string;
+  originalText: string;
+  enhancedVersions: EnhancedPrompt[];
+  platform: Platform;
+  timestamp: Date;
+  wasSuccessful: boolean;
+}
+
 export interface Template {
   id: string;
   name: string;
@@ -100,6 +109,16 @@ export interface Template {
   promptTemplate: string;
   platform?: Platform;
   isPublic: boolean;
+}
+
+export interface SavedTemplate {
+  templateId: string;
+  templateName: string;
+  promptText: string;
+  platform: Platform;
+  settings: UserSettings;
+  category: string;
+  createdAt: Date;
 }
 
 export interface Dataset {
@@ -141,6 +160,8 @@ export interface HermesStore {
   datasets: Dataset[];
   selectedDataset: Dataset | null;
   successfulPromptPatterns: SuccessfulPromptPattern[];
+  promptHistoryItems: PromptHistoryItem[];
+  savedTemplates: SavedTemplate[];
 
   // Actions
   setCurrentPrompt: (prompt: string) => void;
@@ -167,4 +188,11 @@ export interface HermesStore {
     platformId: string,
     tone: Tone
   ) => number;
+  addPromptHistoryItem: (item: PromptHistoryItem) => void;
+  loadPromptHistoryFromStorage: () => void;
+  deletePromptHistoryItem: (promptId: string) => void;
+  addSavedTemplate: (template: SavedTemplate) => void;
+  loadSavedTemplatesFromStorage: () => void;
+  deleteSavedTemplate: (templateId: string) => void;
+  loadTemplateIntoDashboard: (template: SavedTemplate) => void;
 }
