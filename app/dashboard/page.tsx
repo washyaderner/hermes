@@ -19,6 +19,7 @@ import { generateId } from "@/lib/utils";
 import { BatchMode } from "@/components/batch/BatchMode";
 import { ContextSidebar } from "@/components/context/ContextSidebar";
 import { mergeContexts } from "@/lib/context/compression";
+import { PlatformIntelligence } from "@/components/platform/PlatformIntelligence";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -27,6 +28,7 @@ export default function DashboardPage() {
   const {
     currentPrompt,
     selectedPlatform,
+    setSelectedPlatform,
     enhancedPrompts,
     setEnhancedPrompts,
     qualityScores,
@@ -336,6 +338,12 @@ export default function DashboardPage() {
           {/* Left Side - Input */}
           <div className="lg:col-span-1 space-y-6">
             <PlatformSelector platforms={platforms} />
+            <PlatformIntelligence
+              currentPrompt={currentPrompt}
+              selectedPlatform={selectedPlatform}
+              availablePlatforms={platforms}
+              onPlatformSelect={setSelectedPlatform}
+            />
             <DatasetManager />
             <ImportExportControls />
             <ControlPanel />

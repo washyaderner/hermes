@@ -338,3 +338,78 @@ export interface ContextPreset {
   prefilledValues: Record<string, string>;
   quickApply: boolean;
 }
+
+// Platform Intelligence Types
+
+export type PlatformFeature =
+  | "xml-tags"
+  | "json-mode"
+  | "function-calling"
+  | "thinking-tags"
+  | "code-execution"
+  | "image-generation"
+  | "vision"
+  | "web-search"
+  | "file-uploads"
+  | "streaming"
+  | "system-prompts"
+  | "temperature-control";
+
+export type PlatformStrength =
+  | "creative-writing"
+  | "code-generation"
+  | "data-analysis"
+  | "image-generation"
+  | "conversation"
+  | "reasoning"
+  | "speed"
+  | "cost-efficiency";
+
+export interface PlatformCapability {
+  platformId: string;
+  supportedFeatures: PlatformFeature[];
+  strengths: PlatformStrength[];
+  limitations: string[];
+  maxContextWindow: number;
+  costPer1kTokens: number; // in USD
+  avgResponseTime: number; // in seconds
+  reliabilityScore: number; // 0-100
+}
+
+export interface PlatformOptimization {
+  platformId: string;
+  platformName: string;
+  optimizationRules: {
+    useXmlTags?: boolean;
+    useJsonMode?: boolean;
+    useThinkingTags?: boolean;
+    includeSystemPrompt?: boolean;
+    preferredTone?: Tone[];
+    maxPromptLength?: number;
+    specialFormatting?: string;
+    examplePromptStructure?: string;
+  };
+  bestPractices: string[];
+  avoidPatterns: string[];
+}
+
+export interface PlatformRecommendation {
+  platform: Platform;
+  score: number; // 0-100
+  reasoning: string[];
+  costEstimate: number;
+  estimatedResponseTime: number;
+  strengths: string[];
+  warnings: string[];
+  isRecommended: boolean;
+}
+
+export interface RoutingAnalysis {
+  originalPrompt: string;
+  detectedIntent: Intent;
+  recommendations: PlatformRecommendation[];
+  bestMatch: Platform;
+  cheapestOption: Platform;
+  fastestOption: Platform;
+  analysisConfidence: number; // 0-1
+}
