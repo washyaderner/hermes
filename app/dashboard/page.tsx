@@ -20,11 +20,13 @@ import { BatchMode } from "@/components/batch/BatchMode";
 import { ContextSidebar } from "@/components/context/ContextSidebar";
 import { mergeContexts } from "@/lib/context/compression";
 import { PlatformIntelligence } from "@/components/platform/PlatformIntelligence";
+import { PatternLibrary } from "@/components/patterns/PatternLibrary";
 
 export default function DashboardPage() {
   const router = useRouter();
   const [activeMode, setActiveMode] = useState<"single" | "batch">("single");
   const [isContextSidebarOpen, setIsContextSidebarOpen] = useState(false);
+  const [patternEnhancedPrompt, setPatternEnhancedPrompt] = useState<string>("");
   const {
     currentPrompt,
     selectedPlatform,
@@ -227,6 +229,12 @@ export default function DashboardPage() {
     URL.revokeObjectURL(url);
   };
 
+  const handleApplyPattern = (enhancedPrompt: string, patterns: any[]) => {
+    setPatternEnhancedPrompt(enhancedPrompt);
+    // Optionally update the current prompt with pattern-enhanced version
+    // Or show it in a preview
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-surface">
       {/* Top Navigation */}
@@ -343,6 +351,11 @@ export default function DashboardPage() {
               selectedPlatform={selectedPlatform}
               availablePlatforms={platforms}
               onPlatformSelect={setSelectedPlatform}
+            />
+            <PatternLibrary
+              currentPrompt={currentPrompt}
+              detectedIntent={qualityScores.input > 0 ? analyzePrompt(currentPrompt).intent : "unknown"}
+              onApplyPattern={handleApplyPattern}
             />
             <DatasetManager />
             <ImportExportControls />
