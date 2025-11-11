@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
       fewShotCount = 0,
       systemMessage,
       variationCount = 2,
+      datasetContent,
     } = body;
 
     if (!prompt || typeof prompt !== "string") {
@@ -46,8 +47,24 @@ export async function POST(request: NextRequest) {
     // Analyze original prompt
     const originalAnalysis = analyzePrompt(prompt);
 
-    // Generate variations
-    const variations = generateVariations(prompt, platform, variationCount);
+    // Generate variations with dataset context
+    const variations: string[] = [];
+    for (let i = 0; i < variationCount; i++) {
+      const complexity = originalAnalysis.complexity;
+      const resolveAmbiguity = i >= 1; // Only resolve ambiguity for 2nd+ variations
+      const fewShots = i === 2 && complexity > 5 ? 2 : i === 1 && complexity > 7 ? 3 : fewShotCount;
+      const useTone = i === 2 ? "spartan" : tone;
+
+      const enhanced = enhancePrompt(prompt, platform, {
+        tone: useTone as Tone,
+        fewShotCount: fewShots,
+        resolveAmbiguity,
+        systemMessage,
+        datasetContent,
+      });
+
+      variations.push(enhanced);
+    }
 
     // Analyze each variation and create response
     const enhancedPrompts = variations.map((enhanced, index) => {

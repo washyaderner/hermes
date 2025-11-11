@@ -135,6 +135,23 @@ export function resolveAmbiguity(prompt: string): string {
   return enhanced;
 }
 
+// Inject dataset context if available
+export function injectDatasetContext(prompt: string, datasetContent?: string): string {
+  if (!datasetContent) return prompt;
+
+  // Check if prompt mentions needing context or examples
+  const needsContext =
+    prompt.toLowerCase().match(/\b(based on|using|from|like|in the style of|similar to|context|examples)\b/);
+
+  if (needsContext) {
+    // Add dataset as context at the beginning
+    return `Context/Reference Material:\n${datasetContent.substring(0, 3000)}\n\n---\n\nTask: ${prompt}`;
+  }
+
+  // Even if not explicitly mentioned, add it as available context
+  return `[The following context is available for reference]\n${datasetContent.substring(0, 2000)}\n\n${prompt}`;
+}
+
 // Add platform-specific formatting
 export function addPlatformSpecifics(prompt: string, platform: Platform): string {
   let enhanced = prompt;
@@ -173,35 +190,41 @@ export function enhancePrompt(
     fewShotCount?: number;
     systemMessage?: string;
     resolveAmbiguity?: boolean;
+    datasetContent?: string;
   } = {}
 ): string {
   const analysis = analyzePrompt(prompt);
   let enhanced = prompt;
 
-  // 1. Resolve ambiguity if requested
+  // 1. Inject dataset context if provided
+  if (options.datasetContent) {
+    enhanced = injectDatasetContext(enhanced, options.datasetContent);
+  }
+
+  // 2. Resolve ambiguity if requested
   if (options.resolveAmbiguity && analysis.missingComponents.length > 0) {
     enhanced = resolveAmbiguity(enhanced);
   }
 
-  // 2. Add few-shot examples if requested
+  // 3. Add few-shot examples if requested
   if (options.fewShotCount && options.fewShotCount > 0) {
     enhanced = injectExamples(enhanced, options.fewShotCount, analysis.intent);
   }
 
-  // 3. Apply tone if specified
+  // 4. Apply tone if specified
   if (options.tone) {
     enhanced = applyTone(enhanced, options.tone);
   }
 
-  // 4. Add platform-specific formatting
+  // 5. Add platform-specific formatting
   enhanced = addPlatformSpecifics(enhanced, platform);
 
-  // 5. Add system message if provided
+  // 6. Add system message if provided
   if (options.systemMessage) {
     enhanced = addSystemMessage(enhanced, platform, options.systemMessage);
   }
 
-  // 6. Optimize tokens if necessary
+  // 7. Optimize tokens if necessary
   enhanced = optimizeTokens(enhanced, platform.maxTokens);
 
   return enhanced;

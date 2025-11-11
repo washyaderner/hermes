@@ -10,6 +10,7 @@ import { OutputCards } from "@/components/prompt/OutputCards";
 import { QualityMeter } from "@/components/prompt/QualityMeter";
 import { TokenCounter } from "@/components/prompt/TokenCounter";
 import { ControlPanel } from "@/components/prompt/ControlPanel";
+import { DatasetManager } from "@/components/prompt/DatasetManager";
 import { useHermesStore } from "@/lib/store";
 import { analyzePrompt } from "@/lib/prompt-engine/analyzer";
 import { Platform } from "@/types";
@@ -28,6 +29,8 @@ export default function DashboardPage() {
     setIsAnalyzing,
     setIsEnhancing,
     settings,
+    selectedDataset,
+    loadDatasetsFromStorage,
   } = useHermesStore();
 
   const [platforms, setPlatforms] = useState<Platform[]>([]);
@@ -41,13 +44,16 @@ export default function DashboardPage() {
     }
   }, [router]);
 
-  // Load platforms
+  // Load platforms and datasets
   useEffect(() => {
     fetch("/api/platforms")
       .then((res) => res.json())
       .then((data) => setPlatforms(data.platforms))
       .catch((err) => console.error("Failed to load platforms:", err));
-  }, []);
+
+    // Load datasets from localStorage
+    loadDatasetsFromStorage();
+  }, [loadDatasetsFromStorage]);
 
   // Analyze prompt in real-time
   useEffect(() => {
@@ -93,6 +99,7 @@ export default function DashboardPage() {
             ? settings.customSystemMessage
             : undefined,
           variationCount: 3,
+          datasetContent: selectedDataset?.content,
         }),
       });
 
@@ -217,6 +224,7 @@ export default function DashboardPage() {
           {/* Left Side - Input */}
           <div className="lg:col-span-1 space-y-6">
             <PlatformSelector platforms={platforms} />
+            <DatasetManager />
             <ControlPanel />
             <Button
               onClick={handleEnhance}

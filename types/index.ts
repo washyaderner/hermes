@@ -102,6 +102,15 @@ export interface Template {
   isPublic: boolean;
 }
 
+export interface Dataset {
+  id: string;
+  name: string;
+  content: string;
+  description?: string;
+  createdAt: Date;
+  tokenCount: number;
+}
+
 // Zustand store interface
 export interface HermesStore {
   currentPrompt: string;
@@ -112,6 +121,8 @@ export interface HermesStore {
   qualityScores: QualityScores;
   isAnalyzing: boolean;
   isEnhancing: boolean;
+  datasets: Dataset[];
+  selectedDataset: Dataset | null;
 
   // Actions
   setCurrentPrompt: (prompt: string) => void;
@@ -123,4 +134,8 @@ export interface HermesStore {
   setIsAnalyzing: (isAnalyzing: boolean) => void;
   setIsEnhancing: (isEnhancing: boolean) => void;
   toggleFavorite: (id: string) => void;
+  addDataset: (dataset: Dataset) => void;
+  removeDataset: (id: string) => void;
+  setSelectedDataset: (dataset: Dataset | null) => void;
+  loadDatasetsFromStorage: () => void;
 }
