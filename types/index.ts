@@ -800,3 +800,134 @@ export interface EducationalModeSettings {
   autoPlayLessons: boolean;
   tipFrequency: "high" | "medium" | "low";
 }
+
+// ============================================================================
+// Wizard Interface
+// ============================================================================
+
+export type WizardMode = "quick" | "god";
+
+export type WizardStep = "initial" | "enhancements" | "generation" | "complete";
+
+export type RoleType =
+  | "writing-assistant"
+  | "legal-advisor"
+  | "senior-developer"
+  | "data-analyst"
+  | "marketing-expert"
+  | "teacher"
+  | "researcher"
+  | "consultant"
+  | "designer"
+  | "custom";
+
+export type ToneStyle =
+  | "professional"
+  | "casual"
+  | "friendly"
+  | "authoritative"
+  | "empathetic"
+  | "humorous"
+  | "academic"
+  | "creative"
+  | "direct"
+  | "diplomatic";
+
+export type OutputFormatType =
+  | "xml"
+  | "markdown"
+  | "javascript"
+  | "twitter"
+  | "linkedin"
+  | "instagram"
+  | "tiktok"
+  | "twitter-thread"
+  | "blog-post"
+  | "research-paper"
+  | "conversational"
+  | "spartan"
+  | "laconic"
+  | "minimalist"
+  | "custom";
+
+export interface WizardIdentity {
+  role: RoleType;
+  customRole?: string;
+  additionalRoles: string[];
+  expertise: string[];
+}
+
+export interface WizardTask {
+  mainTask: string;
+  context: string;
+  background: string;
+  specificRequirements: string[];
+}
+
+export interface WizardExample {
+  exampleId: string;
+  input: string;
+  output: string;
+  explanation?: string;
+}
+
+export interface WizardConstraints {
+  mustNotDo: string[];
+  negativeExamples: string[];
+  limitations: string[];
+}
+
+export interface WizardOutputConfig {
+  format: OutputFormatType;
+  customFormat?: string;
+  lengthMin?: number;
+  lengthMax?: number;
+  styleModifiers: string[];
+  structureRequirements: string[];
+}
+
+export interface QuickModeData {
+  initialPrompt: string;
+  role?: RoleType;
+  customRole?: string;
+  tone?: ToneStyle;
+  format?: OutputFormatType;
+}
+
+export interface GodModeData {
+  identity: WizardIdentity;
+  task: WizardTask;
+  examples: WizardExample[];
+  constraints: WizardConstraints;
+  outputConfig: WizardOutputConfig;
+}
+
+export interface ReasoningTreeNode {
+  nodeId: string;
+  step: string;
+  description: string;
+  decision?: string;
+  children: ReasoningTreeNode[];
+  isActive: boolean;
+  isComplete: boolean;
+}
+
+export interface WizardState {
+  mode: WizardMode | null;
+  currentStep: WizardStep;
+  quickModeData: QuickModeData;
+  godModeData: GodModeData;
+  generatedPrompt: string;
+  reasoningTree: ReasoningTreeNode | null;
+  isGenerating: boolean;
+}
+
+export interface WizardTemplate {
+  templateId: string;
+  templateName: string;
+  description: string;
+  mode: WizardMode;
+  data: QuickModeData | GodModeData;
+  createdAt: Date;
+  usageCount: number;
+}
