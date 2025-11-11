@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { QualityMeter } from "./QualityMeter";
 import { copyToClipboard, generateId } from "@/lib/utils";
-import { useState } from "react";
+import { useState, memo } from "react";
 import { EnhancedPrompt, SavedTemplate } from "@/types";
 import { useHermesStore } from "@/lib/store";
 
@@ -13,7 +13,7 @@ interface OutputCardsProps {
   prompts: EnhancedPrompt[];
 }
 
-export function OutputCards({ prompts }: OutputCardsProps) {
+export const OutputCards = memo(function OutputCards({ prompts }: OutputCardsProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [markedSuccessfulIds, setMarkedSuccessfulIds] = useState<Set<string>>(new Set());
@@ -236,4 +236,4 @@ export function OutputCards({ prompts }: OutputCardsProps) {
       ))}
     </div>
   );
-}
+});

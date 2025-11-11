@@ -16,6 +16,8 @@ import { useHermesStore, createPromptHash } from "@/lib/store";
 import { analyzePrompt } from "@/lib/prompt-engine/analyzer";
 import { Platform, SuccessfulPromptPattern, Tone, PromptHistoryItem } from "@/types";
 import { generateId } from "@/lib/utils";
+import { useLazyPlatforms } from "@/lib/hooks/useLazyPlatforms";
+import { registerServiceWorker } from "@/lib/service-worker/register";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -42,31 +44,26 @@ export default function DashboardPage() {
     exportAllDataToJson,
   } = useHermesStore();
 
-  const [platforms, setPlatforms] = useState<Platform[]>([]);
+  // Use lazy loading hook for platforms
+  const { platformsData, isLoadingPlatforms, platformLoadError } = useLazyPlatforms();
   const [error, setError] = useState<string>("");
 
-  // Check authentication
+  // Check authentication and register service worker
   useEffect(() => {
     const isAuthenticated = localStorage.getItem("hermes_auth");
     if (!isAuthenticated) {
       router.push("/auth/login");
+      return;
     }
+
+    // Register service worker for offline capability
+    registerServiceWorker();
   }, [router]);
 
-  // Load platforms and datasets
+  // Load datasets and patterns from localStorage
   useEffect(() => {
-    fetch("/api/platforms")
-      .then((res) => res.json())
-      .then((data) => setPlatforms(data.platforms))
-      .catch((err) => console.error("Failed to load platforms:", err));
-
-    // Load datasets from localStorage
     loadDatasetsFromStorage();
-
-    // Load successful patterns from localStorage
     loadSuccessfulPatternsFromStorage();
-
-    // Load prompt history from localStorage
     loadPromptHistoryFromStorage();
   }, [loadDatasetsFromStorage, loadSuccessfulPatternsFromStorage, loadPromptHistoryFromStorage]);
 
@@ -290,7 +287,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Side - Input */}
           <div className="lg:col-span-1 space-y-6">
-            <PlatformSelector platforms={platforms} />
+            <PlatformSelector platforms={platformsData} />
             <DatasetManager />
             <ImportExportControls />
             <ControlPanel />

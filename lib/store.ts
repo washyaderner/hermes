@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { HermesStore, UserSettings, QualityScores, Dataset, SuccessfulPromptPattern, Tone, PromptHistoryItem, SavedTemplate, ExportDataStructure } from "@/types";
+import { setCompressedItem, getCompressedItem } from "@/lib/storage/compression";
 
 const defaultSettings: UserSettings = {
   temperature: 0.7,
@@ -26,7 +27,8 @@ const SAVED_TEMPLATES_STORAGE_KEY = "hermes_saved_templates";
 
 const saveDatasetsToStorage = (datasets: Dataset[]) => {
   try {
-    localStorage.setItem(DATASETS_STORAGE_KEY, JSON.stringify(datasets));
+    // Use compression for datasets as they can be large
+    setCompressedItem(DATASETS_STORAGE_KEY, datasets);
   } catch (error) {
     console.error("Failed to save datasets to localStorage:", error);
   }
@@ -34,10 +36,19 @@ const saveDatasetsToStorage = (datasets: Dataset[]) => {
 
 const loadDatasetsFromStorageSync = (): Dataset[] => {
   try {
+    // Try compressed format first
+    const compressedData = getCompressedItem<Dataset[]>(DATASETS_STORAGE_KEY);
+    if (compressedData) {
+      return compressedData.map((d: any) => ({
+        ...d,
+        createdAt: new Date(d.createdAt),
+      }));
+    }
+
+    // Fallback to uncompressed format for backward compatibility
     const stored = localStorage.getItem(DATASETS_STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      // Convert date strings back to Date objects
       return parsed.map((d: any) => ({
         ...d,
         createdAt: new Date(d.createdAt),
@@ -77,7 +88,8 @@ const loadSuccessfulPatternsFromStorageSync = (): SuccessfulPromptPattern[] => {
 
 const savePromptHistoryToStorage = (items: PromptHistoryItem[]) => {
   try {
-    localStorage.setItem(PROMPT_HISTORY_STORAGE_KEY, JSON.stringify(items));
+    // Use compression for history as it contains enhanced prompts
+    setCompressedItem(PROMPT_HISTORY_STORAGE_KEY, items);
   } catch (error) {
     console.error("Failed to save prompt history to localStorage:", error);
   }
@@ -85,6 +97,20 @@ const savePromptHistoryToStorage = (items: PromptHistoryItem[]) => {
 
 const loadPromptHistoryFromStorageSync = (): PromptHistoryItem[] => {
   try {
+    // Try compressed format first
+    const compressedData = getCompressedItem<PromptHistoryItem[]>(PROMPT_HISTORY_STORAGE_KEY);
+    if (compressedData) {
+      return compressedData.map((item: any) => ({
+        ...item,
+        timestamp: new Date(item.timestamp),
+        enhancedVersions: item.enhancedVersions.map((ev: any) => ({
+          ...ev,
+          createdAt: new Date(ev.createdAt),
+        })),
+      }));
+    }
+
+    // Fallback to uncompressed format for backward compatibility
     const stored = localStorage.getItem(PROMPT_HISTORY_STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
