@@ -991,3 +991,78 @@ export interface SanitizationRule {
   description: string;
   enabled: boolean;
 }
+
+// ============================================================================
+// MCP (Model Context Protocol) Types
+// ============================================================================
+
+export type MCPToolCategory =
+  | "filesystem"
+  | "web"
+  | "database"
+  | "api"
+  | "code-execution"
+  | "search"
+  | "data-processing"
+  | "ai-model"
+  | "custom";
+
+export type MCPConnectionStatus = "connected" | "disconnected" | "connecting" | "error";
+
+export interface MCPTool {
+  toolId: string;
+  name: string;
+  description: string;
+  category: MCPToolCategory;
+  parameters: {
+    name: string;
+    type: string;
+    description: string;
+    required: boolean;
+  }[];
+  examples: string[];
+  serverName: string;
+}
+
+export interface MCPServer {
+  serverId: string;
+  name: string;
+  description: string;
+  status: MCPConnectionStatus;
+  tools: MCPTool[];
+  capabilities: string[];
+  version: string;
+  connectedAt?: Date;
+  lastError?: string;
+}
+
+export interface MCPToolContext {
+  availableTools: MCPTool[];
+  recommendedTools: MCPTool[];
+  toolsByCategory: Record<MCPToolCategory, MCPTool[]>;
+}
+
+export interface ConnectionTemplate {
+  templateId: string;
+  name: string;
+  description: string;
+  category: MCPToolCategory;
+  serverType: string;
+  promptTemplate: string;
+  examples: {
+    title: string;
+    prompt: string;
+    explanation: string;
+  }[];
+  toolRecommendations: string[];
+  setupInstructions?: string;
+}
+
+export interface MCPEnhancementSuggestion {
+  suggestionId: string;
+  originalPrompt: string;
+  enhancedPrompt: string;
+  toolsUsed: string[];
+  improvements: string[];
+  reasoning: string;
+}
