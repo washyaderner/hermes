@@ -17,6 +17,12 @@ const defaultSettings: UserSettings = {
   showPrinciplesSidebar: true,
   showRealTimeTips: true,
   tipFrequency: "medium",
+  // Security Layer defaults
+  securityScanningEnabled: true,
+  autoSanitize: true,
+  securityBlockLevel: "high",
+  showSecurityWarnings: true,
+  securityStrictMode: false,
 };
 
 const defaultQualityScores: QualityScores = {

@@ -82,6 +82,12 @@ export interface UserSettings {
   showPrinciplesSidebar: boolean;
   showRealTimeTips: boolean;
   tipFrequency: "high" | "medium" | "low";
+  // Security Layer
+  securityScanningEnabled: boolean;
+  autoSanitize: boolean;
+  securityBlockLevel: SecurityThreatLevel;
+  showSecurityWarnings: boolean;
+  securityStrictMode: boolean;
 }
 
 export interface QualityScores {
@@ -930,4 +936,58 @@ export interface WizardTemplate {
   data: QuickModeData | GodModeData;
   createdAt: Date;
   usageCount: number;
+}
+
+// ============================================================================
+// Security Layer Types
+// ============================================================================
+
+export type SecurityThreatLevel = "safe" | "low" | "medium" | "high" | "critical";
+
+export type SecurityThreatType =
+  | "prompt-injection"
+  | "system-command"
+  | "delimiter-escape"
+  | "role-manipulation"
+  | "jailbreak-attempt"
+  | "data-exfiltration"
+  | "malicious-instruction"
+  | "suspicious-pattern";
+
+export interface SecurityThreat {
+  threatId: string;
+  type: SecurityThreatType;
+  level: SecurityThreatLevel;
+  pattern: string;
+  match: string;
+  position: { start: number; end: number };
+  description: string;
+  recommendation: string;
+}
+
+export interface SecurityScanResult {
+  isSecure: boolean;
+  threatLevel: SecurityThreatLevel;
+  threats: SecurityThreat[];
+  sanitizedPrompt?: string;
+  warnings: string[];
+  appliedProtections: string[];
+  scannedAt: Date;
+}
+
+export interface SecurityConfig {
+  enableScanning: boolean;
+  autoSanitize: boolean;
+  blockLevel: SecurityThreatLevel; // Block prompts at or above this level
+  showWarnings: boolean;
+  logThreats: boolean;
+  strictMode: boolean; // More aggressive pattern detection
+}
+
+export interface SanitizationRule {
+  ruleId: string;
+  pattern: RegExp;
+  replacement: string;
+  description: string;
+  enabled: boolean;
 }
