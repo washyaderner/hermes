@@ -17,10 +17,13 @@ import { analyzePrompt } from "@/lib/prompt-engine/analyzer";
 import { Platform, SuccessfulPromptPattern, Tone, PromptHistoryItem } from "@/types";
 import { generateId } from "@/lib/utils";
 import { BatchMode } from "@/components/batch/BatchMode";
+import { ContextSidebar } from "@/components/context/ContextSidebar";
+import { mergeContexts } from "@/lib/context/compression";
 
 export default function DashboardPage() {
   const router = useRouter();
   const [activeMode, setActiveMode] = useState<"single" | "batch">("single");
+  const [isContextSidebarOpen, setIsContextSidebarOpen] = useState(false);
   const {
     currentPrompt,
     selectedPlatform,
@@ -42,6 +45,8 @@ export default function DashboardPage() {
     addPromptHistoryItem,
     loadPromptHistoryFromStorage,
     exportAllDataToJson,
+    activeContexts,
+    loadContextsFromStorage,
   } = useHermesStore();
 
   const [platforms, setPlatforms] = useState<Platform[]>([]);
@@ -70,7 +75,10 @@ export default function DashboardPage() {
 
     // Load prompt history from localStorage
     loadPromptHistoryFromStorage();
-  }, [loadDatasetsFromStorage, loadSuccessfulPatternsFromStorage, loadPromptHistoryFromStorage]);
+
+    // Load contexts from localStorage
+    loadContextsFromStorage();
+  }, [loadDatasetsFromStorage, loadSuccessfulPatternsFromStorage, loadPromptHistoryFromStorage, loadContextsFromStorage]);
 
   // Analyze prompt in real-time
   useEffect(() => {
@@ -104,6 +112,9 @@ export default function DashboardPage() {
     setIsEnhancing(true);
 
     try {
+      // Merge active contexts for prompt enhancement
+      const contextText = activeContexts.length > 0 ? mergeContexts(activeContexts) : undefined;
+
       const response = await fetch("/api/enhance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -117,6 +128,7 @@ export default function DashboardPage() {
             : undefined,
           variationCount: 3,
           datasetContent: selectedDataset?.content,
+          contextText,
         }),
       });
 
@@ -238,6 +250,15 @@ export default function DashboardPage() {
             <Button variant="ghost" size="sm" onClick={() => router.push("/templates")}>
               📋 Templates
             </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsContextSidebarOpen(!isContextSidebarOpen)}
+              title="Context Manager"
+              className={isContextSidebarOpen ? "bg-primary/10" : ""}
+            >
+              🧠 Context {activeContexts.length > 0 && `(${activeContexts.length})`}
+            </Button>
             <Button variant="ghost" size="sm" onClick={handleQuickExport} title="Export backup">
               💾 Export
             </Button>
@@ -348,6 +369,12 @@ export default function DashboardPage() {
         </>
         )}
       </div>
+
+      {/* Context Sidebar */}
+      <ContextSidebar
+        isOpen={isContextSidebarOpen}
+        onClose={() => setIsContextSidebarOpen(false)}
+      />
     </div>
   );
 }
