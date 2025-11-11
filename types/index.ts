@@ -208,3 +208,60 @@ export interface ExportDataStructure {
   successfulPromptPatterns: SuccessfulPromptPattern[];
   settings: UserSettings;
 }
+
+// Batch Processing Types
+
+export type BatchProcessingMode = "single-platform" | "rotate-platforms";
+
+export interface BatchPromptItem {
+  id: string;
+  originalPrompt: string;
+  variables?: Record<string, string>;
+  rowNumber: number;
+}
+
+export interface BatchProcessingResult {
+  id: string;
+  originalPrompt: string;
+  enhancedPrompt: string;
+  platform: Platform;
+  qualityScore: number;
+  tokenCount: number;
+  processedAt: Date;
+  processingTimeMs: number;
+  rowNumber: number;
+  variables?: Record<string, string>;
+}
+
+export interface BatchJob {
+  jobId: string;
+  jobName: string;
+  totalPrompts: number;
+  processedCount: number;
+  failedCount: number;
+  mode: BatchProcessingMode;
+  platforms: Platform[];
+  currentPlatformIndex: number;
+  status: "queued" | "processing" | "paused" | "completed" | "failed";
+  startedAt?: Date;
+  completedAt?: Date;
+  pausedAt?: Date;
+  results: BatchProcessingResult[];
+  errors: Array<{
+    promptId: string;
+    rowNumber: number;
+    error: string;
+  }>;
+}
+
+export interface BatchTemplate {
+  templateId: string;
+  templateName: string;
+  templateDescription: string;
+  category: string;
+  icon: string;
+  basePromptTemplate: string;
+  requiredVariables: string[];
+  exampleCsv: string;
+  useCases: string[];
+}
