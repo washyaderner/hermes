@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #0a0014;
+    --foreground: #e2e8f0;
+    --primary: #6b46c1;
+    --primary-foreground: #e2e8f0;
+    --accent: #f97316;
+    --accent-foreground: #e2e8f0;
+    --muted: #64748b;
+    --muted-foreground: #e2e8f0;
+    --surface: #1a0f2e;
+    --border: #2d1f4a;
+    --input: #2d1f4a;
+    --ring: #6b46c1;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-surface;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-primary rounded-md;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-accent;
+}
+
+/* Animations */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(107, 70, 193, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 1000px 100%;
+}
