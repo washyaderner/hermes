@@ -616,3 +616,79 @@ export interface AnalyticsReport {
   insights: AnalyticsInsight[];
   topPrompts: EnhancedPrompt[];
 }
+
+// ============================================================================
+// Decision Tree Enhancement Mode
+// ============================================================================
+
+export type DecisionTreePathType =
+  | "creative"
+  | "technical"
+  | "simple"
+  | "clarity"
+  | "brevity"
+  | "detail"
+  | "expert"
+  | "beginner"
+  | "general";
+
+export type DecisionTreeStrategy =
+  | "style" // Make it more creative/technical/simple
+  | "optimization" // Optimize for clarity/brevity/detail
+  | "audience"; // Target audience: expert/beginner/general
+
+export interface DecisionTreePathTemplate {
+  templateId: string;
+  templateName: string;
+  strategy: DecisionTreeStrategy;
+  pathType: DecisionTreePathType;
+  description: string;
+  instructions: string;
+  systemPrompt: string;
+  examples: string[];
+}
+
+export interface DecisionTreeNode {
+  nodeId: string;
+  level: number; // 0 = root, 1 = first branch, 2 = second branch
+  parentNodeId: string | null;
+  promptText: string;
+  pathTemplate: DecisionTreePathTemplate | null;
+  explanation: string;
+  qualityScore: number;
+  children: DecisionTreeNode[];
+  isSelected: boolean;
+  generatedAt: Date;
+}
+
+export interface DecisionTreePath {
+  pathId: string;
+  nodes: DecisionTreeNode[];
+  strategy: DecisionTreeStrategy;
+  pathTypes: DecisionTreePathType[];
+  finalPrompt: string;
+  totalQualityImprovement: number;
+  isSaved: boolean;
+  createdAt: Date;
+}
+
+export interface SavedDecisionTreeRoute {
+  routeId: string;
+  routeName: string;
+  description: string;
+  strategy: DecisionTreeStrategy;
+  pathTypes: DecisionTreePathType[];
+  templates: DecisionTreePathTemplate[];
+  usageCount: number;
+  avgQualityImprovement: number;
+  createdAt: Date;
+  lastUsed: Date;
+}
+
+export interface DecisionTreeState {
+  isEnabled: boolean;
+  currentTree: DecisionTreeNode | null;
+  selectedPath: DecisionTreeNode[];
+  availableTemplates: DecisionTreePathTemplate[];
+  savedRoutes: SavedDecisionTreeRoute[];
+}
