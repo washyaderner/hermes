@@ -6,6 +6,7 @@ import { QualityMeter } from "./QualityMeter";
 import { copyToClipboard } from "@/lib/utils";
 import { useState } from "react";
 import { EnhancedPrompt } from "@/types";
+import { useHermesStore } from "@/lib/store";
 
 interface OutputCardsProps {
   prompts: EnhancedPrompt[];
@@ -14,13 +15,22 @@ interface OutputCardsProps {
 export function OutputCards({ prompts }: OutputCardsProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [markedSuccessfulIds, setMarkedSuccessfulIds] = useState<Set<string>>(new Set());
+  const { trackPromptSuccess, getUserPreferenceWeighting, settings } = useHermesStore();
 
   const handleCopy = async (text: string, id: string) => {
     const success = await copyToClipboard(text);
     if (success) {
       setCopiedId(id);
       setTimeout(() => setCopiedId(null), 2000);
+      // Track that this prompt was copied (success signal)
+      trackPromptSuccess(id, "copied");
     }
+  };
+
+  const handleMarkSuccessful = (id: string) => {
+    trackPromptSuccess(id, "marked_successful");
+    setMarkedSuccessfulIds((prev) => new Set(prev).add(id));
   };
 
   if (prompts.length === 0) {
@@ -57,6 +67,11 @@ export function OutputCards({ prompts }: OutputCardsProps) {
                   {prompt.qualityScore >= 80 && (
                     <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded">
                       Best
+                    </span>
+                  )}
+                  {getUserPreferenceWeighting(prompt.platform.id, settings.tone) > 0.5 && (
+                    <span className="text-xs bg-accent/20 text-accent px-2 py-1 rounded flex items-center gap-1">
+                      ⭐ Based on your preferences
                     </span>
                   )}
                 </CardTitle>
@@ -136,18 +151,26 @@ export function OutputCards({ prompts }: OutputCardsProps) {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-2 pt-2">
-              <Button
-                size="sm"
-                variant="default"
-                className="flex-1"
-                onClick={() => handleCopy(prompt.enhanced, prompt.id)}
-              >
-                {copiedId === prompt.id ? "✓ Copied!" : "📋 Copy"}
-              </Button>
-              <Button size="sm" variant="outline" className="flex-1">
-                💾 Save to History
-              </Button>
+            <div className="flex flex-col gap-2 pt-2">
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="default"
+                  className="flex-1"
+                  onClick={() => handleCopy(prompt.enhanced, prompt.id)}
+                >
+                  {copiedId === prompt.id ? "✓ Copied!" : "📋 Copy"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant={markedSuccessfulIds.has(prompt.id) ? "accent" : "outline"}
+                  className="flex-1"
+                  onClick={() => handleMarkSuccessful(prompt.id)}
+                  disabled={markedSuccessfulIds.has(prompt.id)}
+                >
+                  {markedSuccessfulIds.has(prompt.id) ? "✓ Marked!" : "⭐ Mark Successful"}
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

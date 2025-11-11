@@ -111,6 +111,23 @@ export interface Dataset {
   tokenCount: number;
 }
 
+export interface SuccessfulPromptPattern {
+  id: string;
+  promptHash: string;
+  originalPrompt: string;
+  enhancedPrompt: string;
+  platformId: string;
+  enhancementType: string; // e.g., "conservative", "balanced", "aggressive"
+  tone: Tone;
+  fewShotCount: number;
+  wasMarkedSuccessful: boolean;
+  wasCopied: boolean;
+  copiedAt?: Date;
+  markedSuccessfulAt?: Date;
+  useCount: number;
+  successWeight: number; // 0-1, higher means more successful
+}
+
 // Zustand store interface
 export interface HermesStore {
   currentPrompt: string;
@@ -123,6 +140,7 @@ export interface HermesStore {
   isEnhancing: boolean;
   datasets: Dataset[];
   selectedDataset: Dataset | null;
+  successfulPromptPatterns: SuccessfulPromptPattern[];
 
   // Actions
   setCurrentPrompt: (prompt: string) => void;
@@ -138,4 +156,15 @@ export interface HermesStore {
   removeDataset: (id: string) => void;
   setSelectedDataset: (dataset: Dataset | null) => void;
   loadDatasetsFromStorage: () => void;
+  addSuccessfulPromptPattern: (pattern: SuccessfulPromptPattern) => void;
+  trackPromptSuccess: (
+    promptId: string,
+    action: "copied" | "marked_successful"
+  ) => void;
+  loadSuccessfulPatternsFromStorage: () => void;
+  getSuccessfulPatternCount: () => number;
+  getUserPreferenceWeighting: (
+    platformId: string,
+    tone: Tone
+  ) => number;
 }

@@ -75,8 +75,12 @@ export async function POST(request: NextRequest) {
         enhancedAnalysis.qualityScore
       );
 
+      // Determine enhancement type based on variation index
+      const enhancementType = index === 0 ? "conservative" : index === 1 ? "balanced" : "aggressive";
+      const usedFewShotCount = index === 2 && originalAnalysis.complexity > 5 ? 2 : index === 1 && originalAnalysis.complexity > 7 ? 3 : fewShotCount;
+
       return {
-        id: `variation-${index + 1}`,
+        id: `variation-${index + 1}-${Date.now()}`,
         original: prompt,
         enhanced,
         platform,
@@ -85,6 +89,12 @@ export async function POST(request: NextRequest) {
         tokenCount: enhancedAnalysis.tokenCount,
         improvement,
         analysis: enhancedAnalysis,
+        // Pattern metadata for success tracking
+        patternMetadata: {
+          enhancementType,
+          tone: index === 2 ? "spartan" : tone,
+          fewShotCount: usedFewShotCount,
+        },
       };
     });
 

@@ -11,9 +11,10 @@ import { QualityMeter } from "@/components/prompt/QualityMeter";
 import { TokenCounter } from "@/components/prompt/TokenCounter";
 import { ControlPanel } from "@/components/prompt/ControlPanel";
 import { DatasetManager } from "@/components/prompt/DatasetManager";
-import { useHermesStore } from "@/lib/store";
+import { useHermesStore, createPromptHash } from "@/lib/store";
 import { analyzePrompt } from "@/lib/prompt-engine/analyzer";
-import { Platform } from "@/types";
+import { Platform, SuccessfulPromptPattern, Tone } from "@/types";
+import { generateId } from "@/lib/utils";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -31,6 +32,10 @@ export default function DashboardPage() {
     settings,
     selectedDataset,
     loadDatasetsFromStorage,
+    loadSuccessfulPatternsFromStorage,
+    successfulPromptPatterns,
+    addSuccessfulPromptPattern,
+    getUserPreferenceWeighting,
   } = useHermesStore();
 
   const [platforms, setPlatforms] = useState<Platform[]>([]);
@@ -53,7 +58,10 @@ export default function DashboardPage() {
 
     // Load datasets from localStorage
     loadDatasetsFromStorage();
-  }, [loadDatasetsFromStorage]);
+
+    // Load successful patterns from localStorage
+    loadSuccessfulPatternsFromStorage();
+  }, [loadDatasetsFromStorage, loadSuccessfulPatternsFromStorage]);
 
   // Analyze prompt in real-time
   useEffect(() => {
@@ -106,6 +114,28 @@ export default function DashboardPage() {
       const data = await response.json();
 
       if (data.success) {
+        // Store successful prompt patterns for each variation
+        data.enhancedPrompts.forEach((enhancedPrompt: any) => {
+          const { id, original, enhanced, platform, patternMetadata } = enhancedPrompt;
+
+          const successfulPattern: SuccessfulPromptPattern = {
+            id,
+            promptHash: createPromptHash(original),
+            originalPrompt: original,
+            enhancedPrompt: enhanced,
+            platformId: platform.id,
+            enhancementType: patternMetadata.enhancementType,
+            tone: patternMetadata.tone as Tone,
+            fewShotCount: patternMetadata.fewShotCount,
+            wasMarkedSuccessful: false,
+            wasCopied: false,
+            useCount: 0,
+            successWeight: 0,
+          };
+
+          addSuccessfulPromptPattern(successfulPattern);
+        });
+
         setEnhancedPrompts(data.enhancedPrompts);
 
         // Calculate average output quality
