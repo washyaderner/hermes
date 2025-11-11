@@ -556,3 +556,63 @@ export interface PromptNote {
   createdAt: Date;
   lastModified: Date;
 }
+
+// Analytics Types
+
+export interface AnalyticsMetrics {
+  totalPrompts: number;
+  totalEnhancements: number;
+  avgQualityImprovement: number; // Percentage improvement
+  totalTokensProcessed: number;
+  avgTokensPerPrompt: number;
+  timeSaved: number; // Minutes saved
+  successRate: number; // 0-1
+  mostUsedPlatform: Platform | null;
+  mostSuccessfulPattern: string | null;
+}
+
+export interface PlatformUsageStats {
+  platformId: string;
+  platformName: string;
+  usageCount: number;
+  successRate: number;
+  avgQualityScore: number;
+  totalTokens: number;
+  percentage: number; // Percentage of total usage
+}
+
+export interface DailyMetrics {
+  date: Date;
+  promptCount: number;
+  avgQualityImprovement: number;
+  tokensUsed: number;
+  successCount: number;
+}
+
+export interface TimeSeriesData {
+  label: string;
+  value: number;
+  date: Date;
+}
+
+export interface AnalyticsInsight {
+  insightId: string;
+  title: string;
+  description: string;
+  value: string | number;
+  trend: "up" | "down" | "stable";
+  icon: string;
+  category: "performance" | "usage" | "quality" | "efficiency";
+}
+
+export interface AnalyticsReport {
+  reportId: string;
+  generatedAt: Date;
+  periodStart: Date;
+  periodEnd: Date;
+  metrics: AnalyticsMetrics;
+  platformStats: PlatformUsageStats[];
+  dailyMetrics: DailyMetrics[];
+  insights: AnalyticsInsight[];
+  topPrompts: EnhancedPrompt[];
+}

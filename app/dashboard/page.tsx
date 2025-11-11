@@ -269,6 +269,9 @@ export default function DashboardPage() {
             >
               🧠 Context {activeContexts.length > 0 && `(${activeContexts.length})`}
             </Button>
+            <Button variant="ghost" size="sm" onClick={() => router.push("/analytics")}>
+              📊 Analytics
+            </Button>
             <Button variant="ghost" size="sm" onClick={handleQuickExport} title="Export backup">
               💾 Export
             </Button>
