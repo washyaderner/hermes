@@ -195,4 +195,16 @@ export interface HermesStore {
   loadSavedTemplatesFromStorage: () => void;
   deleteSavedTemplate: (templateId: string) => void;
   loadTemplateIntoDashboard: (template: SavedTemplate) => void;
+  exportAllDataToJson: () => string;
+  importDataFromJson: (jsonData: string, mergeMode: boolean) => { success: boolean; message: string; itemsImported: number };
+}
+
+export interface ExportDataStructure {
+  version: string;
+  exportedAt: Date;
+  datasets: Dataset[];
+  savedTemplates: SavedTemplate[];
+  promptHistoryItems: PromptHistoryItem[];
+  successfulPromptPatterns: SuccessfulPromptPattern[];
+  settings: UserSettings;
 }

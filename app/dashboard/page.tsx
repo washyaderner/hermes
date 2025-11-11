@@ -11,6 +11,7 @@ import { QualityMeter } from "@/components/prompt/QualityMeter";
 import { TokenCounter } from "@/components/prompt/TokenCounter";
 import { ControlPanel } from "@/components/prompt/ControlPanel";
 import { DatasetManager } from "@/components/prompt/DatasetManager";
+import { ImportExportControls } from "@/components/settings/ImportExportControls";
 import { useHermesStore, createPromptHash } from "@/lib/store";
 import { analyzePrompt } from "@/lib/prompt-engine/analyzer";
 import { Platform, SuccessfulPromptPattern, Tone, PromptHistoryItem } from "@/types";
@@ -38,6 +39,7 @@ export default function DashboardPage() {
     getUserPreferenceWeighting,
     addPromptHistoryItem,
     loadPromptHistoryFromStorage,
+    exportAllDataToJson,
   } = useHermesStore();
 
   const [platforms, setPlatforms] = useState<Platform[]>([]);
@@ -193,6 +195,22 @@ export default function DashboardPage() {
     router.push("/auth/login");
   };
 
+  const handleQuickExport = () => {
+    const jsonData = exportAllDataToJson();
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
+    const filename = `hermes-backup-${timestamp}.json`;
+
+    const blob = new Blob([jsonData], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-surface">
       {/* Top Navigation */}
@@ -217,6 +235,9 @@ export default function DashboardPage() {
             </Button>
             <Button variant="ghost" size="sm" onClick={() => router.push("/templates")}>
               📋 Templates
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleQuickExport} title="Export backup">
+              💾 Export
             </Button>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               🚪 Logout
@@ -271,6 +292,7 @@ export default function DashboardPage() {
           <div className="lg:col-span-1 space-y-6">
             <PlatformSelector platforms={platforms} />
             <DatasetManager />
+            <ImportExportControls />
             <ControlPanel />
             <Button
               onClick={handleEnhance}

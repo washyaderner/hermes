@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { HermesStore, UserSettings, QualityScores, Dataset, SuccessfulPromptPattern, Tone, PromptHistoryItem, SavedTemplate } from "@/types";
+import { HermesStore, UserSettings, QualityScores, Dataset, SuccessfulPromptPattern, Tone, PromptHistoryItem, SavedTemplate, ExportDataStructure } from "@/types";
 
 const defaultSettings: UserSettings = {
   temperature: 0.7,
@@ -315,5 +315,158 @@ export const useHermesStore = create<HermesStore>((set, get) => ({
       selectedPlatform: template.platform,
       settings: template.settings,
     });
+  },
+
+  exportAllDataToJson: () => {
+    const state = get();
+    const exportDataStructure: ExportDataStructure = {
+      version: "1.0.0",
+      exportedAt: new Date(),
+      datasets: state.datasets,
+      savedTemplates: state.savedTemplates,
+      promptHistoryItems: state.promptHistoryItems,
+      successfulPromptPatterns: state.successfulPromptPatterns,
+      settings: state.settings,
+    };
+    return JSON.stringify(exportDataStructure, null, 2);
+  },
+
+  importDataFromJson: (jsonData: string, mergeMode: boolean) => {
+    try {
+      const parsedData = JSON.parse(jsonData);
+
+      // Validate backup integrity in parallel
+      const validationChecks = [
+        typeof parsedData.version === "string",
+        Array.isArray(parsedData.datasets),
+        Array.isArray(parsedData.savedTemplates),
+        Array.isArray(parsedData.promptHistoryItems),
+        Array.isArray(parsedData.successfulPromptPatterns),
+        typeof parsedData.settings === "object",
+      ];
+
+      const validateBackupIntegrity = validationChecks.every((check) => check === true);
+
+      if (!validateBackupIntegrity) {
+        return {
+          success: false,
+          message: "Invalid backup file format",
+          itemsImported: 0,
+        };
+      }
+
+      // Convert date strings back to Date objects
+      const importedData: ExportDataStructure = {
+        ...parsedData,
+        exportedAt: new Date(parsedData.exportedAt),
+        datasets: parsedData.datasets.map((d: any) => ({
+          ...d,
+          createdAt: new Date(d.createdAt),
+        })),
+        savedTemplates: parsedData.savedTemplates.map((t: any) => ({
+          ...t,
+          createdAt: new Date(t.createdAt),
+        })),
+        promptHistoryItems: parsedData.promptHistoryItems.map((h: any) => ({
+          ...h,
+          timestamp: new Date(h.timestamp),
+          enhancedVersions: h.enhancedVersions.map((ev: any) => ({
+            ...ev,
+            createdAt: new Date(ev.createdAt),
+          })),
+        })),
+        successfulPromptPatterns: parsedData.successfulPromptPatterns.map((p: any) => ({
+          ...p,
+          copiedAt: p.copiedAt ? new Date(p.copiedAt) : undefined,
+          markedSuccessfulAt: p.markedSuccessfulAt ? new Date(p.markedSuccessfulAt) : undefined,
+        })),
+      };
+
+      let itemsImported = 0;
+
+      if (mergeMode) {
+        // Merge imported data with existing data
+        set((state) => {
+          const mergedDatasets = [...state.datasets];
+          importedData.datasets.forEach((dataset) => {
+            if (!mergedDatasets.find((d) => d.id === dataset.id)) {
+              mergedDatasets.push(dataset);
+              itemsImported++;
+            }
+          });
+
+          const mergedTemplates = [...state.savedTemplates];
+          importedData.savedTemplates.forEach((template) => {
+            if (!mergedTemplates.find((t) => t.templateId === template.templateId)) {
+              mergedTemplates.push(template);
+              itemsImported++;
+            }
+          });
+
+          const mergedHistory = [...state.promptHistoryItems];
+          importedData.promptHistoryItems.forEach((item) => {
+            if (!mergedHistory.find((h) => h.promptId === item.promptId)) {
+              mergedHistory.push(item);
+              itemsImported++;
+            }
+          });
+
+          const mergedPatterns = [...state.successfulPromptPatterns];
+          importedData.successfulPromptPatterns.forEach((pattern) => {
+            if (!mergedPatterns.find((p) => p.id === pattern.id)) {
+              mergedPatterns.push(pattern);
+              itemsImported++;
+            }
+          });
+
+          // Save to localStorage
+          saveDatasetsToStorage(mergedDatasets);
+          saveSavedTemplatesToStorage(mergedTemplates);
+          savePromptHistoryToStorage(mergedHistory.slice(0, 20));
+          saveSuccessfulPatternsToStorage(mergedPatterns);
+
+          return {
+            datasets: mergedDatasets,
+            savedTemplates: mergedTemplates,
+            promptHistoryItems: mergedHistory.slice(0, 20),
+            successfulPromptPatterns: mergedPatterns,
+            settings: { ...state.settings, ...importedData.settings },
+          };
+        });
+      } else {
+        // Replace all data with imported data
+        itemsImported =
+          importedData.datasets.length +
+          importedData.savedTemplates.length +
+          importedData.promptHistoryItems.length +
+          importedData.successfulPromptPatterns.length;
+
+        saveDatasetsToStorage(importedData.datasets);
+        saveSavedTemplatesToStorage(importedData.savedTemplates);
+        savePromptHistoryToStorage(importedData.promptHistoryItems.slice(0, 20));
+        saveSuccessfulPatternsToStorage(importedData.successfulPromptPatterns);
+
+        set({
+          datasets: importedData.datasets,
+          savedTemplates: importedData.savedTemplates,
+          promptHistoryItems: importedData.promptHistoryItems.slice(0, 20),
+          successfulPromptPatterns: importedData.successfulPromptPatterns,
+          settings: importedData.settings,
+        });
+      }
+
+      return {
+        success: true,
+        message: mergeMode ? "Data merged successfully" : "Data restored successfully",
+        itemsImported,
+      };
+    } catch (error) {
+      console.error("Error importing data:", error);
+      return {
+        success: false,
+        message: "Failed to parse backup file",
+        itemsImported: 0,
+      };
+    }
   },
 }));
