@@ -481,3 +481,78 @@ export interface VisualPatternBuilder {
   createdAt: Date;
   lastModified: Date;
 }
+
+// Collaboration & Sharing Types
+
+export interface ShareableLink {
+  linkId: string;
+  shortCode: string; // 8-character unique code
+  promptId: string;
+  originalPrompt: string;
+  enhancedPrompt: string;
+  platform: Platform;
+  qualityScore: number;
+  improvements: string[];
+  createdBy: string;
+  createdAt: Date;
+  expiresAt?: Date;
+  viewCount: number;
+  isPublic: boolean;
+  allowCopy: boolean;
+}
+
+export interface PromptCollection {
+  collectionId: string;
+  collectionName: string;
+  description: string;
+  icon: string;
+  prompts: EnhancedPrompt[];
+  tags: string[];
+  isPublic: boolean;
+  createdBy: string;
+  createdAt: Date;
+  lastModified: Date;
+  exportFormat: "json" | "markdown" | "csv";
+}
+
+export interface PromptVersion {
+  versionId: string;
+  promptId: string;
+  versionNumber: number;
+  content: string;
+  changes: VersionChange[];
+  createdAt: Date;
+  createdBy: string;
+  notes: string;
+}
+
+export interface VersionChange {
+  changeId: string;
+  changeType: "addition" | "deletion" | "modification";
+  oldText?: string;
+  newText?: string;
+  position: number;
+  reason: string;
+}
+
+export interface PromptComment {
+  commentId: string;
+  promptId: string;
+  userId: string;
+  userName: string;
+  content: string;
+  createdAt: Date;
+  editedAt?: Date;
+  isResolved: boolean;
+  replies: PromptComment[];
+}
+
+export interface PromptNote {
+  noteId: string;
+  promptId: string;
+  content: string;
+  color: "yellow" | "blue" | "green" | "red" | "purple";
+  position?: { start: number; end: number }; // Highlight position in prompt
+  createdAt: Date;
+  lastModified: Date;
+}
