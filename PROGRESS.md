@@ -122,7 +122,7 @@ Hermes is designed to transform basic prompts into platform-specific optimized p
 ## Resources
 
 - Repository: `washyaderner/hermes`
-- Branch: `claude/fix-hermes-progress-report-011CV2Y46ZVMhduZSAVGfv56`
+- Branch: `claude/fix-hermes-progress-report-011CV2m431gm8RsYvJeJpAV9`
 - Documentation: README.md
 - License: MIT
 
