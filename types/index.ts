@@ -473,3 +473,71 @@ export interface RoutingAnalysis {
   fastestOption: Platform;
   analysisConfidence: number; // 0-1
 }
+
+// Prompt Pattern Library Types
+
+export type PromptPatternType =
+  | "chain-of-thought"
+  | "few-shot"
+  | "tree-of-thoughts"
+  | "react"
+  | "constitutional-ai"
+  | "zero-shot-cot"
+  | "self-consistency"
+  | "persona"
+  | "instruction-following";
+
+export interface PromptPattern {
+  patternId: string;
+  patternName: string;
+  patternType: PromptPatternType;
+  description: string;
+  icon: string;
+  category: "reasoning" | "examples" | "structure" | "safety" | "persona";
+  difficulty: "beginner" | "intermediate" | "advanced";
+  applicableIntents: Intent[];
+  template: string; // Template with placeholders like {task}, {examples}, {context}
+  exampleUsage: string;
+  effectivenessScore: number; // 0-100, based on historical data
+  benefits: string[];
+  bestPractices: string[];
+  compatiblePatterns: string[]; // IDs of patterns that work well together
+}
+
+export interface PatternApplication {
+  pattern: PromptPattern;
+  appliedAt: Date;
+  appliedPrompt: string;
+  resultQuality: number; // User feedback or automatic quality score
+  wasSuccessful: boolean;
+  platformId: string;
+}
+
+export interface PatternCombination {
+  combinationId: string;
+  combinationName: string;
+  patterns: PromptPattern[];
+  combinationTemplate: string; // How to combine the patterns
+  effectivenessScore: number;
+  useCount: number;
+  successRate: number;
+  applicableIntents: Intent[];
+  description: string;
+}
+
+export interface PatternBlock {
+  blockId: string;
+  blockType: PromptPatternType;
+  content: string;
+  order: number;
+  isEnabled: boolean;
+}
+
+export interface VisualPatternBuilder {
+  builderId: string;
+  builderName: string;
+  blocks: PatternBlock[];
+  compiledPrompt: string;
+  createdAt: Date;
+  lastModified: Date;
+}
