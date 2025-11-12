@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select } from '@/components/ui/select';
+import { borderRadius } from '@/lib/design-tokens';
 
 interface QuickModeProps {
   onBack: () => void;
@@ -52,7 +53,7 @@ export function QuickMode({ onBack, onGenerate }: QuickModeProps) {
           {[1, 2, 3].map((s) => (
             <div
               key={s}
-              className={`h-1 flex-1 rounded-full ${
+              className={`h-1 flex-1 ${borderRadius.input} ${
                 s <= step ? 'bg-slate-500' : 'bg-slate-800'
               }`}
             />
@@ -73,15 +74,15 @@ export function QuickMode({ onBack, onGenerate }: QuickModeProps) {
                 What do you want to create?
               </h2>
               <p className="text-slate-400 mb-8">Enter your initial prompt or idea</p>
-              
+
               <Textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Type your prompt here..."
-                className="min-h-[200px] text-lg bg-slate-900 border-slate-800 text-slate-100 focus:border-slate-600"
+                className={`min-h-[200px] text-lg bg-slate-900 border-slate-800 text-slate-100 focus:border-slate-600 ${borderRadius.input}`}
                 autoFocus
               />
-              
+
               <Button
                 onClick={handleNext}
                 disabled={!prompt.trim()}
@@ -130,10 +131,10 @@ export function QuickMode({ onBack, onGenerate }: QuickModeProps) {
                       <button
                         key={t}
                         onClick={() => setTone(t.toLowerCase())}
-                        className={`p-3 rounded-lg border text-sm ${
+                        className={`p-3 ${borderRadius.card.compact} border text-sm transition-all duration-200 ${
                           tone === t.toLowerCase()
                             ? 'bg-slate-700 border-slate-600 text-slate-100'
-                            : 'bg-slate-900 border-slate-800 text-slate-400'
+                            : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'
                         }`}
                       >
                         {t}
@@ -176,7 +177,7 @@ export function QuickMode({ onBack, onGenerate }: QuickModeProps) {
               </h2>
               <p className="text-slate-400 mb-8">Review and generate your optimized prompt</p>
 
-              <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 space-y-4">
+              <div className={`bg-slate-900 border border-slate-800 ${borderRadius.card.default} p-6 space-y-4`}>
                 <div>
                   <div className="text-xs text-slate-500 mb-1">YOUR PROMPT</div>
                   <div className="text-slate-200">{prompt}</div>
