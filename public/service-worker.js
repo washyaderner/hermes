@@ -1,24 +1,29 @@
-// Hermes Service Worker for Offline Capability
-// Cache version - increment when you want to force cache refresh
-const CACHE_VERSION = 'hermes-v1';
-const CACHE_ASSETS = [
+// Hermes Service Worker for PWA Offline Capability
+const CACHE_VERSION = 'hermes-v2-pwa';
+const STATIC_CACHE = `${CACHE_VERSION}-static`;
+const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
+const API_CACHE = `${CACHE_VERSION}-api`;
+
+const STATIC_ASSETS = [
   '/',
   '/dashboard',
   '/history',
   '/templates',
   '/auth/login',
+  '/manifest.json',
 ];
+
+const CACHE_EXPIRY_TIME = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 // Install event - cache essential assets
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Installing...');
+  console.log('[Service Worker] Installing v2...');
   event.waitUntil(
-    caches.open(CACHE_VERSION).then((cache) => {
-      console.log('[Service Worker] Caching essential assets');
-      return cache.addAll(CACHE_ASSETS);
+    caches.open(STATIC_CACHE).then((cache) => {
+      console.log('[Service Worker] Caching static assets');
+      return cache.addAll(STATIC_ASSETS);
     })
   );
-  // Force the waiting service worker to become the active service worker
   self.skipWaiting();
 });
 
@@ -29,7 +34,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_VERSION) {
+          if (!cacheName.startsWith(CACHE_VERSION)) {
             console.log('[Service Worker] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
@@ -37,7 +42,6 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
-  // Claim all clients immediately
   return self.clients.claim();
 });
 
@@ -55,20 +59,19 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Clone the response before caching
-          const responseToCache = response.clone();
-          caches.open(CACHE_VERSION).then((cache) => {
-            cache.put(request, responseToCache);
-          });
+          if (response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(API_CACHE).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
           return response;
         })
         .catch(() => {
-          // If network fails, try to serve from cache
           return caches.match(request).then((cachedResponse) => {
             if (cachedResponse) {
               return cachedResponse;
             }
-            // Return offline response for API calls
             return new Response(
               JSON.stringify({
                 success: false,
@@ -90,26 +93,35 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
       if (cachedResponse) {
-        return cachedResponse;
+        // Check cache expiry
+        const cachedDate = new Date(cachedResponse.headers.get('date'));
+        const now = new Date();
+        if (now - cachedDate < CACHE_EXPIRY_TIME) {
+          return cachedResponse;
+        }
       }
 
       return fetch(request)
         .then((response) => {
-          // Don't cache non-successful responses
           if (!response || response.status !== 200 || response.type === 'error') {
             return response;
           }
 
-          // Clone the response before caching
           const responseToCache = response.clone();
-          caches.open(CACHE_VERSION).then((cache) => {
+          const cacheName = STATIC_ASSETS.includes(new URL(request.url).pathname)
+            ? STATIC_CACHE
+            : DYNAMIC_CACHE;
+
+          caches.open(cacheName).then((cache) => {
             cache.put(request, responseToCache);
           });
 
           return response;
         })
         .catch(() => {
-          // Return offline page for navigation requests
+          if (cachedResponse) {
+            return cachedResponse;
+          }
           if (request.mode === 'navigate') {
             return caches.match('/dashboard');
           }
@@ -118,6 +130,32 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
+// Background sync for pending enhancements
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-pending-enhancements') {
+    event.waitUntil(syncPendingEnhancements());
+  }
+});
+
+async function syncPendingEnhancements() {
+  try {
+    const cache = await caches.open(API_CACHE);
+    const keys = await cache.keys();
+    const pendingRequests = keys.filter((req) => req.url.includes('/api/enhance'));
+
+    for (const request of pendingRequests) {
+      try {
+        await fetch(request);
+        await cache.delete(request);
+      } catch (error) {
+        console.log('[Service Worker] Sync failed for:', request.url);
+      }
+    }
+  } catch (error) {
+    console.error('[Service Worker] Background sync error:', error);
+  }
+}
 
 // Message event - handle messages from clients
 self.addEventListener('message', (event) => {
@@ -129,6 +167,14 @@ self.addEventListener('message', (event) => {
     event.waitUntil(
       caches.keys().then((cacheNames) => {
         return Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+      })
+    );
+  }
+
+  if (event.data && event.data.type === 'CACHE_URLS') {
+    event.waitUntil(
+      caches.open(DYNAMIC_CACHE).then((cache) => {
+        return cache.addAll(event.data.urls);
       })
     );
   }

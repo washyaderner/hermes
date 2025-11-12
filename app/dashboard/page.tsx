@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { MobileNavigationDrawer } from "@/components/mobile/MobileNavigationDrawer";
+import { PWAInstallBanner } from "@/components/mobile/PWAInstallBanner";
+import { useDeviceDetection } from "@/hooks/useDeviceDetection";
 import { InputArea } from "@/components/prompt/InputArea";
 import { PlatformSelector } from "@/components/prompt/PlatformSelector";
 import { OutputCards } from "@/components/prompt/OutputCards";
@@ -29,7 +32,10 @@ export default function DashboardPage() {
   const router = useRouter();
   const [activeMode, setActiveMode] = useState<"single" | "batch" | "tree">("single");
   const [isContextSidebarOpen, setIsContextSidebarOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeMobilePanel, setActiveMobilePanel] = useState<"input" | "output">("input");
   const [patternEnhancedPrompt, setPatternEnhancedPrompt] = useState<string>("");
+  const { isMobile, isTablet, deviceType } = useDeviceDetection();
   const {
     currentPrompt,
     selectedPlatform,
@@ -235,10 +241,30 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-surface">
+      {/* Mobile Navigation Drawer */}
+      <MobileNavigationDrawer
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+      />
+
+      {/* PWA Install Banner */}
+      <PWAInstallBanner />
+
       {/* Top Navigation */}
       <nav className="border-b border-border bg-surface/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
+            {/* Hamburger Menu for Mobile */}
+            {(isMobile || isTablet) && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="lg:hidden"
+              >
+                <span className="text-2xl">☰</span>
+              </Button>
+            )}
             <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center text-xl">
               ⚡
             </div>
@@ -246,12 +272,13 @@ export default function DashboardPage() {
               <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 Hermes
               </h1>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground hidden sm:block">
                 Prompt Optimization Platform
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center gap-4">
             <Button variant="ghost" size="sm" onClick={() => router.push("/history")}>
               📜 History
             </Button>
@@ -280,33 +307,50 @@ export default function DashboardPage() {
               🚪 Logout
             </Button>
           </div>
+          {/* Mobile Quick Actions */}
+          <div className="flex lg:hidden items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsContextSidebarOpen(!isContextSidebarOpen)}
+              title="Context Manager"
+            >
+              🧠
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleQuickExport} title="Export">
+              💾
+            </Button>
+          </div>
         </div>
       </nav>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 py-4 sm:py-6">
         {/* Mode Tabs */}
-        <div className="mb-6 flex gap-2">
+        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-2">
           <Button
             variant={activeMode === "single" ? "default" : "outline"}
             onClick={() => setActiveMode("single")}
-            className="flex-1"
+            className="flex-1 touch-manipulation"
           >
-            ✨ Single Mode
+            <span className="hidden sm:inline">✨ Single Mode</span>
+            <span className="sm:hidden">✨ Single</span>
           </Button>
           <Button
             variant={activeMode === "batch" ? "default" : "outline"}
             onClick={() => setActiveMode("batch")}
-            className="flex-1"
+            className="flex-1 touch-manipulation"
           >
-            📦 Batch Mode
+            <span className="hidden sm:inline">📦 Batch Mode</span>
+            <span className="sm:hidden">📦 Batch</span>
           </Button>
           <Button
             variant={activeMode === "tree" ? "default" : "outline"}
             onClick={() => setActiveMode("tree")}
-            className="flex-1"
+            className="flex-1 touch-manipulation"
           >
-            🌳 Decision Tree
+            <span className="hidden sm:inline">🌳 Decision Tree</span>
+            <span className="sm:hidden">🌳 Tree</span>
           </Button>
         </div>
 
@@ -329,33 +373,33 @@ export default function DashboardPage() {
         ) : (
           <>
         {/* Quality Metrics Bar */}
-        <Card className="mb-6 border-primary/20">
-          <div className="p-6">
-            <div className="flex items-center justify-between gap-6">
-              <div className="flex items-center gap-6">
+        <Card className="mb-4 sm:mb-6 border-primary/20">
+          <div className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+              <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
                 <QualityMeter
                   score={qualityScores.input}
-                  label="Input Quality"
-                  size="md"
+                  label="Input"
+                  size={isMobile ? "sm" : "md"}
                 />
-                <div className="text-4xl text-muted-foreground">→</div>
+                <div className="text-2xl sm:text-4xl text-muted-foreground">→</div>
                 <QualityMeter
                   score={qualityScores.output}
-                  label="Output Quality"
-                  size="md"
+                  label="Output"
+                  size={isMobile ? "sm" : "md"}
                 />
                 {qualityScores.tokenOptimization > 0 && (
                   <>
-                    <div className="text-4xl text-muted-foreground">•</div>
+                    <div className="text-2xl sm:text-4xl text-muted-foreground">•</div>
                     <QualityMeter
                       score={qualityScores.tokenOptimization}
-                      label="Token Saved"
-                      size="md"
+                      label="Saved"
+                      size={isMobile ? "sm" : "md"}
                     />
                   </>
                 )}
               </div>
-              <div className="flex-1 max-w-md">
+              <div className="flex-1 w-full sm:max-w-md">
                 <TokenCounter
                   text={currentPrompt}
                   maxTokens={selectedPlatform?.maxTokens}
@@ -366,10 +410,32 @@ export default function DashboardPage() {
           </div>
         </Card>
 
+        {/* Mobile Panel Switcher */}
+        {(isMobile || isTablet) && (
+          <div className="mb-4 flex gap-2 lg:hidden">
+            <Button
+              variant={activeMobilePanel === "input" ? "default" : "outline"}
+              onClick={() => setActiveMobilePanel("input")}
+              className="flex-1 touch-manipulation"
+            >
+              📝 Input & Settings
+            </Button>
+            <Button
+              variant={activeMobilePanel === "output" ? "default" : "outline"}
+              onClick={() => setActiveMobilePanel("output")}
+              className="flex-1 touch-manipulation"
+            >
+              ✨ Results
+            </Button>
+          </div>
+        )}
+
         {/* Main Split View */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Side - Input */}
-          <div className="lg:col-span-1 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+          {/* Left Side - Settings (Hidden on mobile when output panel active) */}
+          <div className={`lg:col-span-1 space-y-4 sm:space-y-6 ${
+            (isMobile || isTablet) && activeMobilePanel === "output" ? "hidden lg:block" : ""
+          }`}>
             <PlatformSelector platforms={platformsData} />
             <PlatformIntelligence
               currentPrompt={currentPrompt}
@@ -388,7 +454,7 @@ export default function DashboardPage() {
             <Button
               onClick={handleEnhance}
               disabled={!currentPrompt || !selectedPlatform || isEnhancing}
-              className="w-full h-12 text-lg"
+              className="w-full h-12 text-lg touch-manipulation"
               variant="accent"
             >
               {isEnhancing ? "✨ Optimizing..." : "✨ Optimize Prompt"}
@@ -400,14 +466,18 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Middle - Input Area */}
-          <div className="lg:col-span-1">
+          {/* Middle - Input Area (Hidden on mobile when output panel active) */}
+          <div className={`lg:col-span-1 ${
+            (isMobile || isTablet) && activeMobilePanel === "output" ? "hidden lg:block" : ""
+          }`}>
             <InputArea />
           </div>
 
-          {/* Right Side - Output */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24">
+          {/* Right Side - Output (Hidden on mobile when input panel active) */}
+          <div className={`lg:col-span-1 ${
+            (isMobile || isTablet) && activeMobilePanel === "input" ? "hidden lg:block" : ""
+          }`}>
+            <div className="lg:sticky lg:top-24">
               <OutputCards prompts={enhancedPrompts} />
             </div>
           </div>
