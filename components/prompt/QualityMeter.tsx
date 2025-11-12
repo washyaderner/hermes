@@ -20,7 +20,7 @@ export function QualityMeter({ score, label, size = "md" }: QualityMeterProps) {
 
   // Color based on score
   const getColor = (score: number) => {
-    if (score >= 80) return "#6b46c1"; // primary - purple
+    if (score >= 80) return "#64748b"; // slate-500
     if (score >= 60) return "#f97316"; // accent - orange
     if (score >= 40) return "#fbbf24"; // yellow
     return "#ef4444"; // red

@@ -141,7 +141,7 @@ export function ProgressTracker({ userId, compact = false }: ProgressTrackerProp
 
           <div className="bg-accent/30 rounded-lg p-3">
             <div className="flex items-center gap-2 mb-1">
-              <Award className="h-4 w-4 text-purple-500" />
+              <Award className="h-4 w-4 text-slate-500" />
               <span className="text-xs font-medium">Achievements</span>
             </div>
             <div className="text-2xl font-bold">{stats.achievements}</div>
