@@ -18,9 +18,11 @@ import { Platform, SuccessfulPromptPattern, Tone, PromptHistoryItem } from "@/ty
 import { generateId } from "@/lib/utils";
 import { useLazyPlatforms } from "@/lib/hooks/useLazyPlatforms";
 import { registerServiceWorker } from "@/lib/service-worker/register";
+import { BatchMode } from "@/components/batch/BatchMode";
 
 export default function DashboardPage() {
   const router = useRouter();
+  const [activeMode, setActiveMode] = useState<"single" | "batch">("single");
   const {
     currentPrompt,
     selectedPlatform,
@@ -248,6 +250,28 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-6">
+        {/* Mode Tabs */}
+        <div className="mb-6 flex gap-2">
+          <Button
+            variant={activeMode === "single" ? "default" : "outline"}
+            onClick={() => setActiveMode("single")}
+            className="flex-1"
+          >
+            ✨ Single Mode
+          </Button>
+          <Button
+            variant={activeMode === "batch" ? "default" : "outline"}
+            onClick={() => setActiveMode("batch")}
+            className="flex-1"
+          >
+            📦 Batch Mode
+          </Button>
+        </div>
+
+        {activeMode === "batch" ? (
+          <BatchMode platforms={platformsData} />
+        ) : (
+          <>
         {/* Quality Metrics Bar */}
         <Card className="mb-6 border-primary/20">
           <div className="p-6">
@@ -321,6 +345,8 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+        </>
+        )}
       </div>
     </div>
   );
