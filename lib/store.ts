@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { HermesStore, UserSettings, QualityScores, Dataset, SuccessfulPromptPattern, Tone, PromptHistoryItem, SavedTemplate, ExportDataStructure } from "@/types";
+import { HermesStore, UserSettings, QualityScores, Dataset, SuccessfulPromptPattern, Tone, PromptHistoryItem, SavedTemplate, ExportDataStructure, Context } from "@/types";
 import { setCompressedItem, getCompressedItem } from "@/lib/storage/compression";
 
 const defaultSettings: UserSettings = {
@@ -24,6 +24,7 @@ const DATASETS_STORAGE_KEY = "hermes_datasets";
 const SUCCESSFUL_PATTERNS_STORAGE_KEY = "hermes_successful_patterns";
 const PROMPT_HISTORY_STORAGE_KEY = "hermes_prompt_history";
 const SAVED_TEMPLATES_STORAGE_KEY = "hermes_saved_templates";
+const CONTEXTS_STORAGE_KEY = "hermes_contexts";
 
 const saveDatasetsToStorage = (datasets: Dataset[]) => {
   try {
@@ -153,6 +154,31 @@ const loadSavedTemplatesFromStorageSync = (): SavedTemplate[] => {
   return [];
 };
 
+const saveContextsToStorage = (contexts: Context[]) => {
+  try {
+    localStorage.setItem(CONTEXTS_STORAGE_KEY, JSON.stringify(contexts));
+  } catch (error) {
+    console.error("Failed to save contexts to localStorage:", error);
+  }
+};
+
+const loadContextsFromStorageSync = (): Context[] => {
+  try {
+    const stored = localStorage.getItem(CONTEXTS_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return parsed.map((context: any) => ({
+        ...context,
+        createdAt: new Date(context.createdAt),
+        lastUsedAt: new Date(context.lastUsedAt),
+      }));
+    }
+  } catch (error) {
+    console.error("Failed to load contexts from localStorage:", error);
+  }
+  return [];
+};
+
 // Helper to create a hash for prompt comparison
 export const createPromptHash = (prompt: string): string => {
   // Simple hash function for prompt matching
@@ -179,6 +205,10 @@ export const useHermesStore = create<HermesStore>((set, get) => ({
   successfulPromptPatterns: [],
   promptHistoryItems: [],
   savedTemplates: [],
+  contexts: [],
+  activeContexts: [],
+  projectContext: null,
+  sessionContext: null,
 
   setCurrentPrompt: (prompt) => set({ currentPrompt: prompt }),
 
@@ -495,4 +525,57 @@ export const useHermesStore = create<HermesStore>((set, get) => ({
       };
     }
   },
+
+  addContext: (context: Context) =>
+    set((state) => {
+      const newContexts = [...state.contexts, context];
+      saveContextsToStorage(newContexts);
+      return { contexts: newContexts };
+    }),
+
+  removeContext: (contextId: string) =>
+    set((state) => {
+      const newContexts = state.contexts.filter((c) => c.contextId !== contextId);
+      saveContextsToStorage(newContexts);
+      return { contexts: newContexts };
+    }),
+
+  updateContext: (contextId: string, updates: Partial<Context>) =>
+    set((state) => {
+      const newContexts = state.contexts.map((c) =>
+        c.contextId === contextId ? { ...c, ...updates } : c
+      );
+      saveContextsToStorage(newContexts);
+      return { contexts: newContexts };
+    }),
+
+  setActiveContexts: (contextIds: string[]) =>
+    set((state) => {
+      const activeContexts = state.contexts.filter((c) => contextIds.includes(c.contextId));
+      return { activeContexts };
+    }),
+
+  setProjectContext: (context: Context | null) =>
+    set({ projectContext: context }),
+
+  setSessionContext: (context: Context | null) =>
+    set({ sessionContext: context }),
+
+  loadContextsFromStorage: () => {
+    const contexts = loadContextsFromStorageSync();
+    const projectContext = contexts.find((c) => c.contextType === "project") || null;
+    const sessionContext = contexts.find((c) => c.contextType === "session") || null;
+    set({ contexts, projectContext, sessionContext });
+  },
+
+  clearSessionContext: () =>
+    set((state) => {
+      const newContexts = state.contexts.filter((c) => c.contextType !== "session");
+      saveContextsToStorage(newContexts);
+      return {
+        contexts: newContexts,
+        sessionContext: null,
+        activeContexts: state.activeContexts.filter((c) => c.contextType !== "session"),
+      };
+    }),
 }));

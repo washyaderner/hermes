@@ -162,6 +162,10 @@ export interface HermesStore {
   successfulPromptPatterns: SuccessfulPromptPattern[];
   promptHistoryItems: PromptHistoryItem[];
   savedTemplates: SavedTemplate[];
+  contexts: Context[];
+  activeContexts: Context[]; // Currently active contexts that will be included in prompts
+  projectContext: Context | null; // Persistent project context
+  sessionContext: Context | null; // Current session context
 
   // Actions
   setCurrentPrompt: (prompt: string) => void;
@@ -197,6 +201,14 @@ export interface HermesStore {
   loadTemplateIntoDashboard: (template: SavedTemplate) => void;
   exportAllDataToJson: () => string;
   importDataFromJson: (jsonData: string, mergeMode: boolean) => { success: boolean; message: string; itemsImported: number };
+  addContext: (context: Context) => void;
+  removeContext: (contextId: string) => void;
+  updateContext: (contextId: string, updates: Partial<Context>) => void;
+  setActiveContexts: (contextIds: string[]) => void;
+  setProjectContext: (context: Context | null) => void;
+  setSessionContext: (context: Context | null) => void;
+  loadContextsFromStorage: () => void;
+  clearSessionContext: () => void;
 }
 
 export interface ExportDataStructure {
@@ -324,4 +336,65 @@ export interface BatchTemplate {
   requiredVariables: string[];
   exampleCsv: string;
   useCases: string[];
+}
+
+// Context Management Types
+
+export type ContextType = "project" | "session" | "preset";
+
+export type ContextTemplateType = "codebase" | "brand-voice" | "academic" | "custom";
+
+export interface ContextField {
+  fieldId: string;
+  fieldName: string;
+  fieldValue: string;
+  isRequired: boolean;
+  placeholder: string;
+  tokenWeight: number; // How important this field is for context (0-1)
+}
+
+export interface ContextTemplate {
+  templateId: string;
+  templateName: string;
+  templateType: ContextTemplateType;
+  description: string;
+  icon: string;
+  fields: ContextField[];
+  compressedFormat: string; // Template for token-efficient formatting
+  exampleContext: string;
+  applicableIntents: Intent[]; // When to suggest this template
+}
+
+export interface Context {
+  contextId: string;
+  contextType: ContextType;
+  templateId: string;
+  templateName: string;
+  fields: Record<string, string>; // fieldId -> value
+  compressedText: string; // Token-optimized version
+  rawText: string; // Full version
+  tokenCount: number;
+  createdAt: Date;
+  lastUsedAt: Date;
+  useCount: number;
+  isPersistent: boolean; // Project context persists, session doesn't
+}
+
+export interface ContextDetection {
+  detectedIntent: Intent;
+  suggestedTemplates: ContextTemplate[];
+  detectedKeywords: string[];
+  confidence: number; // 0-1
+  reasoning: string;
+  missingContextFields: string[];
+}
+
+export interface ContextPreset {
+  presetId: string;
+  presetName: string;
+  description: string;
+  icon: string;
+  contextTemplate: ContextTemplate;
+  prefilledValues: Record<string, string>;
+  quickApply: boolean;
 }
