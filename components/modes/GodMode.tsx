@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 
 interface GodModeProps {
@@ -13,14 +12,14 @@ interface GodModeProps {
 }
 
 export function GodMode({ onBack, onGenerate }: GodModeProps) {
-  const [identity, setIdentity] = useState('');
-  const [task, setTask] = useState('');
+  const [prompt, setPrompt] = useState('');
+  const [role, setRole] = useState('');
   const [desires, setDesires] = useState('');
   const [constraints, setConstraints] = useState('');
   const [format, setFormat] = useState('');
 
   const handleGenerate = () => {
-    onGenerate({ identity, task, desires, constraints, format });
+    onGenerate({ prompt, role, desires, constraints, format });
   };
 
   return (
@@ -44,18 +43,31 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
         </div>
       </div>
 
-      {/* Main Content - Grid Layout Above Fold */}
-      <div className="flex-1 overflow-y-auto px-8 py-6">
+      {/* Main Content - Two Column Layout */}
+      <div className="flex-1 overflow-hidden px-8 py-6">
         <div className="max-w-7xl mx-auto h-full">
           <div className="grid grid-cols-2 gap-6 h-full">
-            {/* Left Column */}
-            <div className="space-y-4">
-              {/* Roles */}
+            {/* Left Column - Original Prompt */}
+            <div className="flex flex-col">
+              <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-5 flex flex-col h-full">
+                <label className="block text-sm font-medium text-slate-300 mb-3">Original Prompt</label>
+                <Textarea
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder="Enter your original prompt here..."
+                  className="flex-1 bg-slate-900 border-slate-700 text-slate-100 resize-none"
+                />
+              </div>
+            </div>
+
+            {/* Right Column - Configuration Options */}
+            <div className="flex flex-col space-y-4 overflow-y-auto">
+              {/* Role */}
               <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-5">
-                <label className="block text-sm font-medium text-slate-300 mb-3">Roles</label>
+                <label className="block text-sm font-medium text-slate-300 mb-3">Role</label>
                 <Select
-                  value={identity}
-                  onChange={(e) => setIdentity(e.target.value)}
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
                   className="w-full bg-slate-900 border-slate-700 text-slate-100"
                 >
                   <option value="">Select role...</option>
@@ -67,20 +79,6 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
                 </Select>
               </div>
 
-              {/* Task */}
-              <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-5 flex-1">
-                <label className="block text-sm font-medium text-slate-300 mb-3">Task</label>
-                <Textarea
-                  value={task}
-                  onChange={(e) => setTask(e.target.value)}
-                  placeholder="Define the task..."
-                  className="h-[calc(100%-2rem)] bg-slate-900 border-slate-700 text-slate-100 resize-none"
-                />
-              </div>
-            </div>
-
-            {/* Right Column */}
-            <div className="space-y-4">
               {/* Desires */}
               <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-5">
                 <label className="block text-sm font-medium text-slate-300 mb-3">Desires</label>
@@ -88,7 +86,7 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
                   value={desires}
                   onChange={(e) => setDesires(e.target.value)}
                   placeholder="Ideal output examples..."
-                  className="h-28 bg-slate-900 border-slate-700 text-slate-100 resize-none"
+                  className="h-24 bg-slate-900 border-slate-700 text-slate-100 resize-none"
                 />
               </div>
 
@@ -99,7 +97,7 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
                   value={constraints}
                   onChange={(e) => setConstraints(e.target.value)}
                   placeholder="What NOT to do..."
-                  className="h-28 bg-slate-900 border-slate-700 text-slate-100 resize-none"
+                  className="h-24 bg-slate-900 border-slate-700 text-slate-100 resize-none"
                 />
               </div>
 
@@ -133,7 +131,7 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
         <div className="max-w-7xl mx-auto">
           <Button
             onClick={handleGenerate}
-            disabled={!task.trim()}
+            disabled={!prompt.trim()}
             className="w-full bg-slate-800 hover:bg-slate-700 text-slate-100"
             size="lg"
           >
