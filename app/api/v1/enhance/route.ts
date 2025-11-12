@@ -3,7 +3,8 @@ import { analyzePrompt, countTokens } from "@/lib/prompt-engine/analyzer";
 import { enhancePrompt } from "@/lib/prompt-engine/enhancer";
 import { getPlatformById } from "@/lib/prompt-engine/platforms";
 import { generateId } from "@/lib/utils";
-import { UserSettings, Tone } from "@/types";
+import { UserSettings, Tone, SecurityThreatLevel } from "@/types";
+import { processPromptSecurely } from "@/lib/security/sanitizer";
 
 // CORS headers for automation platforms
 const corsHeaders = {
@@ -70,10 +71,63 @@ export async function POST(request: NextRequest) {
       showPrinciplesSidebar: settings.showPrinciplesSidebar ?? true,
       showRealTimeTips: settings.showRealTimeTips ?? true,
       tipFrequency: (settings.tipFrequency as any) ?? "medium",
+      securityScanningEnabled: settings.securityScanningEnabled ?? true,
+      autoSanitize: settings.autoSanitize ?? true,
+      securityBlockLevel: (settings.securityBlockLevel as SecurityThreatLevel) ?? "high",
+      showSecurityWarnings: settings.showSecurityWarnings ?? true,
+      securityStrictMode: settings.securityStrictMode ?? false,
     };
 
-    // Perform initial prompt analysis
-    const originalAnalysisResult = analyzePrompt(prompt);
+    // Security Layer: Process prompt for threats
+    let processedPrompt = prompt;
+    let securityResult = null;
+
+    if (userSettingsConfiguration.securityScanningEnabled) {
+      const securityProcessing = processPromptSecurely(prompt, {
+        enableScanning: true,
+        autoSanitize: userSettingsConfiguration.autoSanitize,
+        strictMode: userSettingsConfiguration.securityStrictMode,
+        maxLength: 10000,
+      });
+
+      if (!securityProcessing.success) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: securityProcessing.error || "Security scan failed",
+            securityResult: securityProcessing.securityResult,
+          },
+          { status: 400, headers: corsHeaders }
+        );
+      }
+
+      securityResult = securityProcessing.securityResult;
+
+      // Block if threat level is at or above configured block level
+      const threatLevels: SecurityThreatLevel[] = ["safe", "low", "medium", "high", "critical"];
+      const blockLevelIndex = threatLevels.indexOf(userSettingsConfiguration.securityBlockLevel);
+      const currentLevelIndex = threatLevels.indexOf(securityResult.threatLevel);
+
+      if (currentLevelIndex >= blockLevelIndex && currentLevelIndex > 1) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Prompt blocked due to ${securityResult.threatLevel} security threat level`,
+            securityResult,
+            message: "Please review and modify your prompt to remove potentially harmful patterns",
+          },
+          { status: 403, headers: corsHeaders }
+        );
+      }
+
+      // Use sanitized prompt if available and auto-sanitize is enabled
+      if (userSettingsConfiguration.autoSanitize && securityProcessing.processedPrompt) {
+        processedPrompt = securityProcessing.processedPrompt;
+      }
+    }
+
+    // Perform initial prompt analysis (using processed/sanitized prompt)
+    const originalAnalysisResult = analyzePrompt(processedPrompt);
 
     // Determine variation count based on prompt complexity
     const promptComplexity = originalAnalysisResult.complexity;
@@ -94,7 +148,7 @@ export async function POST(request: NextRequest) {
       };
 
       const enhancedPromptText = enhancePrompt(
-        prompt,
+        processedPrompt,
         platformConfigurationData,
         enhancementOptions
       );
@@ -143,6 +197,7 @@ export async function POST(request: NextRequest) {
     const analysisResponseStructure = {
       success: true,
       original: prompt,
+      processedPrompt: processedPrompt !== prompt ? processedPrompt : undefined,
       enhanced: enhancedPromptsWithAnalysis,
       scores: {
         inputQuality: originalAnalysisResult.qualityScore,
@@ -152,6 +207,7 @@ export async function POST(request: NextRequest) {
           (enhancedPromptsWithAnalysis[0]?.tokenCount ?? 1)) * 100
         ),
       },
+      security: securityResult,
       metadata: {
         platform: platformConfigurationData.name,
         variationCount: enhancedPromptsWithAnalysis.length,
