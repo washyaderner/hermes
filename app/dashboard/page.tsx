@@ -23,10 +23,11 @@ import { ContextSidebar } from "@/components/context/ContextSidebar";
 import { mergeContexts } from "@/lib/context/compression";
 import { PlatformIntelligence } from "@/components/platform/PlatformIntelligence";
 import { PatternLibrary } from "@/components/patterns/PatternLibrary";
+import { DecisionTreeMode } from "@/components/decision-tree/DecisionTreeMode";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [activeMode, setActiveMode] = useState<"single" | "batch">("single");
+  const [activeMode, setActiveMode] = useState<"single" | "batch" | "tree">("single");
   const [isContextSidebarOpen, setIsContextSidebarOpen] = useState(false);
   const [patternEnhancedPrompt, setPatternEnhancedPrompt] = useState<string>("");
   const {
@@ -300,10 +301,31 @@ export default function DashboardPage() {
           >
             📦 Batch Mode
           </Button>
+          <Button
+            variant={activeMode === "tree" ? "default" : "outline"}
+            onClick={() => setActiveMode("tree")}
+            className="flex-1"
+          >
+            🌳 Decision Tree
+          </Button>
         </div>
 
         {activeMode === "batch" ? (
           <BatchMode platforms={platformsData} />
+        ) : activeMode === "tree" ? (
+          <DecisionTreeMode
+            initialPrompt={currentPrompt}
+            onPromptChange={(prompt) => {
+              // Update the current prompt in the store
+              const event = { target: { value: prompt } } as React.ChangeEvent<HTMLTextAreaElement>;
+              const textarea = document.querySelector('textarea[placeholder*="Enter your prompt"]') as HTMLTextAreaElement;
+              if (textarea) {
+                textarea.value = prompt;
+                textarea.dispatchEvent(new Event('input', { bubbles: true }));
+              }
+            }}
+            onClose={() => setActiveMode("single")}
+          />
         ) : (
           <>
         {/* Quality Metrics Bar */}
