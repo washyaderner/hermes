@@ -233,6 +233,9 @@ export default function DashboardPage() {
             <Button variant="ghost" size="sm" onClick={() => router.push("/templates")}>
               📋 Templates
             </Button>
+            <Button variant="ghost" size="sm" onClick={() => router.push("/workflows")}>
+              🔗 Workflows
+            </Button>
             <Button variant="ghost" size="sm" onClick={handleQuickExport} title="Export backup">
               💾 Export
             </Button>

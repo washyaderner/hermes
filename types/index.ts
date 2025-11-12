@@ -208,3 +208,63 @@ export interface ExportDataStructure {
   successfulPromptPatterns: SuccessfulPromptPattern[];
   settings: UserSettings;
 }
+
+// Workflow and Prompt Chaining Types
+
+export type WorkflowStepType = "prompt" | "transform" | "condition";
+
+export interface WorkflowStep {
+  id: string;
+  stepNumber: number;
+  stepType: WorkflowStepType;
+  platform: Platform;
+  promptTemplate: string;
+  useOutputFromStep?: number; // Reference to previous step (1-based)
+  transformationType?: "summarize" | "expand" | "rephrase" | "extract" | "none";
+  conditionCheck?: string;
+  description: string;
+}
+
+export interface Workflow {
+  id: string;
+  workflowName: string;
+  workflowDescription: string;
+  category: string;
+  steps: WorkflowStep[];
+  isBuiltIn: boolean;
+  createdAt: Date;
+  lastUsedAt?: Date;
+  useCount: number;
+}
+
+export interface WorkflowExecution {
+  executionId: string;
+  workflowId: string;
+  startedAt: Date;
+  completedAt?: Date;
+  currentStepNumber: number;
+  stepResults: WorkflowStepResult[];
+  status: "running" | "completed" | "failed" | "paused";
+  errorMessage?: string;
+}
+
+export interface WorkflowStepResult {
+  stepId: string;
+  stepNumber: number;
+  inputPrompt: string;
+  outputResult: string;
+  platform: Platform;
+  tokenCount: number;
+  executedAt: Date;
+  executionTimeMs: number;
+}
+
+export interface WorkflowTemplate {
+  templateId: string;
+  templateName: string;
+  templateDescription: string;
+  category: string;
+  steps: Omit<WorkflowStep, "id">[];
+  icon: string;
+  useCases: string[];
+}
