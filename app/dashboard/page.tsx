@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ModeSelection } from "@/components/modes/ModeSelection";
+import { QuickMode } from "@/components/modes/QuickMode";
+import { GodMode } from "@/components/modes/GodMode";
 import { InputArea } from "@/components/prompt/InputArea";
 import { PlatformSelector } from "@/components/prompt/PlatformSelector";
 import { OutputCards } from "@/components/prompt/OutputCards";
@@ -28,6 +31,7 @@ import { DecisionTreeMode } from "@/components/decision-tree/DecisionTreeMode";
 export default function DashboardPage() {
   const router = useRouter();
   const [activeMode, setActiveMode] = useState<"single" | "batch" | "tree">("single");
+  const [selectedWizardMode, setSelectedWizardMode] = useState<'quick' | 'god' | null>(null);
   const [isContextSidebarOpen, setIsContextSidebarOpen] = useState(false);
   const [patternEnhancedPrompt, setPatternEnhancedPrompt] = useState<string>("");
   const {
@@ -229,9 +233,35 @@ export default function DashboardPage() {
 
   const handleApplyPattern = (enhancedPrompt: string, patterns: any[]) => {
     setPatternEnhancedPrompt(enhancedPrompt);
-    // Optionally update the current prompt with pattern-enhanced version
-    // Or show it in a preview
   };
+
+  const handleModeSelection = (mode: 'quick' | 'god') => {
+    setSelectedWizardMode(mode);
+  };
+
+  const handleModeBack = () => {
+    setSelectedWizardMode(null);
+  };
+
+  const handleGenerate = (data: any) => {
+    console.log('Generate with data:', data);
+    setSelectedWizardMode(null);
+  };
+
+  // Show mode selection if no mode selected
+  if (selectedWizardMode === null) {
+    return <ModeSelection onSelectMode={handleModeSelection} />;
+  }
+
+  // Show Quick Mode
+  if (selectedWizardMode === 'quick') {
+    return <QuickMode onBack={handleModeBack} onGenerate={handleGenerate} />;
+  }
+
+  // Show God Mode
+  if (selectedWizardMode === 'god') {
+    return <GodMode onBack={handleModeBack} onGenerate={handleGenerate} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-surface">
