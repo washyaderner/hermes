@@ -75,6 +75,13 @@ export interface UserSettings {
   fewShotCount: number;
   systemMessageEnabled: boolean;
   customSystemMessage: string;
+  // Educational Mode
+  learningModeEnabled: boolean;
+  showTooltips: boolean;
+  showWhyBadges: boolean;
+  showPrinciplesSidebar: boolean;
+  showRealTimeTips: boolean;
+  tipFrequency: "high" | "medium" | "low";
 }
 
 export interface QualityScores {
@@ -751,4 +758,105 @@ export interface DecisionTreeState {
   selectedPath: DecisionTreeNode[];
   availableTemplates: DecisionTreePathTemplate[];
   savedRoutes: SavedDecisionTreeRoute[];
+}
+
+// ============================================================================
+// Educational Mode
+// ============================================================================
+
+export type LessonCategory =
+  | "token-optimization"
+  | "platform-differences"
+  | "few-shot-learning"
+  | "prompt-injection"
+  | "context-management"
+  | "quality-metrics"
+  | "advanced-patterns"
+  | "debugging";
+
+export type SkillLevel = "beginner" | "intermediate" | "advanced";
+
+export interface MiniLesson {
+  lessonId: string;
+  title: string;
+  category: LessonCategory;
+  skillLevel: SkillLevel;
+  description: string;
+  content: string; // Markdown content
+  keyTakeaways: string[];
+  practicePrompt?: string;
+  estimatedMinutes: number;
+  prerequisites: string[]; // lessonIds
+  relatedLessons: string[]; // lessonIds
+}
+
+export interface PromptEngineeringPrinciple {
+  principleId: string;
+  title: string;
+  shortDescription: string;
+  fullDescription: string;
+  examples: {
+    bad: string;
+    good: string;
+    explanation: string;
+  }[];
+  category: LessonCategory;
+  importance: "critical" | "important" | "helpful";
+}
+
+export interface EnhancementExplanation {
+  explanationId: string;
+  changeType: "structure" | "clarity" | "specificity" | "context" | "formatting" | "optimization";
+  before: string;
+  after: string;
+  reason: string;
+  principle: string; // principleId
+  impact: "high" | "medium" | "low";
+  learnMore?: string; // lessonId
+}
+
+export interface RealTimeTip {
+  tipId: string;
+  trigger: "typing" | "pause" | "long-prompt" | "unclear" | "missing-context";
+  condition: (prompt: string) => boolean;
+  message: string;
+  suggestion?: string;
+  learnMore?: string; // lessonId
+  priority: "high" | "medium" | "low";
+}
+
+export interface SkillProgress {
+  skillId: string;
+  skillName: string;
+  category: LessonCategory;
+  description: string;
+  isLearned: boolean;
+  learnedAt?: Date;
+  practiceCount: number;
+  relatedLessons: string[]; // lessonIds
+}
+
+export interface LearningProgress {
+  userId: string;
+  skillsLearned: SkillProgress[];
+  lessonsCompleted: string[]; // lessonIds
+  totalPracticePrompts: number;
+  currentStreak: number; // days
+  lastActivityDate: Date;
+  achievements: {
+    achievementId: string;
+    title: string;
+    description: string;
+    unlockedAt: Date;
+  }[];
+}
+
+export interface EducationalModeSettings {
+  isEnabled: boolean;
+  showTooltips: boolean;
+  showWhyBadges: boolean;
+  showPrinciplesSidebar: boolean;
+  showRealTimeTips: boolean;
+  autoPlayLessons: boolean;
+  tipFrequency: "high" | "medium" | "low";
 }
