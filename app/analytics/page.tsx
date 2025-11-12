@@ -14,6 +14,11 @@ import { SuccessRateChart } from "@/components/analytics/SuccessRateChart";
 import { TokenUsageChart } from "@/components/analytics/TokenUsageChart";
 import { QualityImprovementChart } from "@/components/analytics/QualityImprovementChart";
 import { InsightsPanel } from "@/components/analytics/InsightsPanel";
+import { PromptQualityGraph } from "@/components/analytics/PromptQualityGraph";
+import { PlatformUsageHeatmap } from "@/components/analytics/PlatformUsageHeatmap";
+import { TokenCostTracker } from "@/components/analytics/TokenCostTracker";
+import { PromptFlowDiagram } from "@/components/analytics/PromptFlowDiagram";
+import { DataAggregator } from "@/utils/analytics/DataAggregator";
 import { Download, ArrowLeft, RefreshCw, FileText, Printer } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { platforms as PLATFORMS } from "@/lib/prompt-engine/platforms";
@@ -30,6 +35,22 @@ export default function AnalyticsPage() {
   useEffect(() => {
     generateReport();
   }, [periodDays, promptHistory, promptHistoryItems]);
+
+  // Prepare data for new enhanced charts
+  const enhancedChartData = report ? {
+    qualityGraph: DataAggregator.aggregateMetrics(promptHistoryItems).qualityTrend.map(d => ({
+      date: d.date,
+      quality: d.quality,
+      rollingAverage: d.quality * 0.95, // Mock rolling average
+    })),
+    platformHeatmap: DataAggregator.aggregateMetrics(promptHistoryItems).platformUsage,
+    costData: promptHistoryItems.map((item, index) => ({
+      date: new Date(item.timestamp).toLocaleDateString(),
+      cost: Math.random() * 0.5, // Mock cost data
+      tokens: item.enhancedVersions.reduce((sum, v) => sum + v.tokenCount, 0),
+      platform: item.platform.name,
+    })),
+  } : null;
 
   const generateReport = () => {
     setIsLoading(true);
@@ -209,6 +230,33 @@ export default function AnalyticsPage() {
 
           {/* Insights Panel */}
           <InsightsPanel insights={report.insights} />
+
+          {/* Enhanced Quality Graph (Full Width) */}
+          {enhancedChartData && (
+            <PromptQualityGraph 
+              data={enhancedChartData.qualityGraph}
+              onExport={handleExportJSON}
+            />
+          )}
+
+          {/* Token Cost Tracker & Flow Diagram */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            {enhancedChartData && (
+              <TokenCostTracker 
+                data={enhancedChartData.costData}
+                monthlyBudget={100}
+              />
+            )}
+            <PromptFlowDiagram onExportJSON={handleExportJSON} />
+          </div>
+
+          {/* Platform Usage Heatmap (Full Width) */}
+          {enhancedChartData && (
+            <PlatformUsageHeatmap 
+              data={enhancedChartData.platformHeatmap}
+              onPlatformClick={(platform) => console.log('Filter by platform:', platform)}
+            />
+          )}
 
           {/* Charts Row 1 */}
           <div className="grid gap-6 md:grid-cols-2">
