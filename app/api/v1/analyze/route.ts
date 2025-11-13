@@ -1,31 +1,62 @@
 import { NextRequest, NextResponse } from "next/server";
 import { analyzePrompt } from "@/lib/prompt-engine/analyzer";
+import { requireAuth } from "@/lib/middleware/auth";
+import { checkRateLimit } from "@/lib/middleware/rateLimit";
+import { corsMiddleware, getCorsHeaders } from "@/lib/utils/cors";
+import { validateRequestSize, validateParsedBodySize } from "@/lib/middleware/requestSize";
+import { requireCsrfToken } from "@/lib/middleware/csrf";
+import { validationError, serverError } from "@/lib/utils/errors";
 
-// CORS headers for automation platforms
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
-export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders });
+export async function OPTIONS(request: NextRequest) {
+  const corsResponse = corsMiddleware(request);
+  return corsResponse || NextResponse.json({}, { headers: getCorsHeaders(request) });
 }
 
 export async function POST(request: NextRequest) {
+  // Handle CORS
+  const corsResponse = corsMiddleware(request);
+  if (corsResponse) {
+    return corsResponse;
+  }
+
+  // Check authentication
+  const authResult = await requireAuth(request);
+  if (!authResult.isAuthenticated) {
+    return authResult.response!;
+  }
+
+  // Check CSRF token
+  const csrfResult = await requireCsrfToken(request);
+  if (!csrfResult.isValid) {
+    return csrfResult.response!;
+  }
+
+  // Check rate limit
+  const rateLimitResult = await checkRateLimit(request, "analyze");
+  if (!rateLimitResult.allowed) {
+    return rateLimitResult.response!;
+  }
+
+  // Validate request size
+  const sizeCheck = await validateRequestSize(request, "analyze");
+  if (!sizeCheck.isValid) {
+    return sizeCheck.response!;
+  }
+
   try {
     const requestBody = await request.json();
+
+    // Validate parsed body size
+    const bodySizeCheck = validateParsedBodySize(requestBody, "analyze");
+    if (!bodySizeCheck.isValid) {
+      return bodySizeCheck.response!;
+    }
+
     const { prompt } = requestBody;
 
     // Validate required fields
     if (!prompt || typeof prompt !== "string") {
-      return NextResponse.json(
-        { 
-          success: false,
-          error: "Prompt is required and must be a string" 
-        },
-        { status: 400, headers: corsHeaders }
-      );
+      return validationError("Prompt is required and must be a string");
     }
 
     // Perform prompt analysis
@@ -60,15 +91,8 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    return NextResponse.json(analysisResponseStructure, { headers: corsHeaders });
+    return NextResponse.json(analysisResponseStructure, { headers: getCorsHeaders(request) });
   } catch (error) {
-    console.error("Error analyzing prompt:", error);
-    return NextResponse.json(
-      { 
-        success: false,
-        error: "Failed to analyze prompt" 
-      },
-      { status: 500, headers: corsHeaders }
-    );
+    return serverError("Failed to analyze prompt", error);
   }
 }

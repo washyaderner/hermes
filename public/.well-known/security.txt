@@ -1,0 +1,22 @@
+Contact: mailto:security@example.com
+Expires: 2026-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://example.com/.well-known/security.txt
+
+# Security Policy
+# 
+# We take security seriously. If you discover a security vulnerability,
+# please follow responsible disclosure practices:
+#
+# 1. Do not disclose the vulnerability publicly until we have addressed it
+# 2. Provide detailed information about the vulnerability
+# 3. Allow us reasonable time to fix the issue before disclosure
+#
+# We appreciate your help in keeping our application secure.
+
+# Acknowledgments
+# We would like to thank security researchers who help us improve our security.
+
+# Note: Update the Contact email and Canonical URL with your actual information
+# before deploying to production.
+

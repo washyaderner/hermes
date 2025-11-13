@@ -4,18 +4,21 @@
 
 @layer base {
   :root {
+    /* Minimalist Dark Theme - Pure Black & Slate */
     --background: #000000;
     --foreground: #e2e8f0;
     --primary: #1e293b;
-    --primary-foreground: #f1f5f9;
+    --primary-foreground: #ffffff;
     --accent: #334155;
-    --accent-foreground: #f1f5f9;
+    --accent-foreground: #ffffff;
     --muted: #475569;
     --muted-foreground: #94a3b8;
     --surface: #0f172a;
     --border: #1e293b;
     --input: #0f172a;
-    --ring: #334155;
+    --ring: #94a3b8;
+
+    /* Slate Scale */
     --slate-50: #f8fafc;
     --slate-100: #f1f5f9;
     --slate-200: #e2e8f0;
@@ -26,6 +29,11 @@
     --slate-700: #334155;
     --slate-800: #1e293b;
     --slate-900: #0f172a;
+
+    /* Semantic Colors */
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --error: #ef4444;
   }
 
   * {
@@ -77,7 +85,7 @@
   background: linear-gradient(
     to right,
     transparent 0%,
-    rgba(107, 70, 193, 0.1) 50%,
+    rgba(100, 116, 139, 0.08) 50%,
     transparent 100%
   );
   background-size: 1000px 100%;
