@@ -28,6 +28,13 @@ export function validateOrigin(origin: string | null): boolean {
     }
   }
 
+  // Allow Vercel preview deployments (any subdomain of vercel.app)
+  // This handles preview deployments automatically
+  const vercelPattern = /^https:\/\/[a-z0-9-]+(-[a-z0-9]+)*\.vercel\.app$/;
+  if (vercelPattern.test(origin)) {
+    return true;
+  }
+
   return false;
 }
 
