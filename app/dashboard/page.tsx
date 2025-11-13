@@ -66,14 +66,25 @@ export default function DashboardPage() {
 
   // Check authentication and register service worker
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("hermes_auth");
-    if (!isAuthenticated) {
-      router.push("/auth/login");
-      return;
-    }
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("/api/auth/session");
+        const data = await response.json();
 
-    // Register service worker for offline capability
-    registerServiceWorker();
+        if (!data.authenticated) {
+          router.push("/auth/login");
+          return;
+        }
+
+        // Register service worker for offline capability
+        registerServiceWorker();
+      } catch (error) {
+        console.error("Auth check error:", error);
+        router.push("/auth/login");
+      }
+    };
+
+    checkAuth();
   }, [router]);
 
   // Load datasets and patterns from localStorage
@@ -209,10 +220,16 @@ export default function DashboardPage() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("hermes_auth");
-    localStorage.removeItem("hermes_user");
-    router.push("/auth/login");
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.push("/auth/login");
+      router.refresh();
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Still redirect even if logout API fails
+      router.push("/auth/login");
+    }
   };
 
   const handleQuickExport = () => {

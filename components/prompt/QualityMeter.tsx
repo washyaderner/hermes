@@ -18,12 +18,12 @@ export function QualityMeter({ score, label, size = "md" }: QualityMeterProps) {
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (score / 100) * circumference;
 
-  // Color based on score
+  // Color based on score - Minimalist slate palette
   const getColor = (score: number) => {
-    if (score >= 80) return "#64748b"; // slate-500
-    if (score >= 60) return "#f97316"; // accent - orange
-    if (score >= 40) return "#fbbf24"; // yellow
-    return "#ef4444"; // red
+    if (score >= 80) return "#22c55e"; // green - success
+    if (score >= 60) return "#94a3b8"; // slate-400 - good
+    if (score >= 40) return "#64748b"; // slate-500 - moderate
+    return "#475569"; // slate-600 - needs improvement
   };
 
   const color = getColor(score);

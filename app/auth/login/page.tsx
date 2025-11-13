@@ -10,19 +10,37 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
-    // Hardcoded credentials
-    if (username === "russ" && password === "password") {
-      localStorage.setItem("hermes_auth", "true");
-      localStorage.setItem("hermes_user", username);
-      router.push("/dashboard");
-    } else {
-      setError("Invalid credentials. Try username: russ, password: password");
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Session cookie is set automatically by server
+        router.push("/dashboard");
+        router.refresh();
+      } else {
+        setError(data.error || "Invalid credentials");
+      }
+    } catch (err) {
+      setError("Network error. Please try again.");
+      console.error("Login error:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -73,13 +91,13 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
-            <Button type="submit" className="w-full" size="lg">
-              Sign In
+            <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+              {isLoading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
           <div className="mt-6 text-center text-xs text-muted-foreground">
-            Demo credentials: <span className="text-primary">russ</span> /{" "}
-            <span className="text-primary">password</span>
+            Default credentials: <span className="text-primary">russ</span> /{" "}
+            <span className="text-primary">SecurePassword123!</span>
           </div>
         </CardContent>
       </Card>

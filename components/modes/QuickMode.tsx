@@ -79,7 +79,7 @@ export function QuickMode({ onBack, onGenerate }: QuickModeProps) {
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Type your prompt here..."
-                className={`min-h-[200px] text-lg bg-slate-900 border-slate-800 text-slate-100 focus:border-slate-600 ${borderRadius.input}`}
+                className={`min-h-[200px] text-lg bg-slate-900 border-slate-800 text-slate-100 focus:border-slate-400 focus:outline-none focus:ring-0 transition-colors duration-300 ${borderRadius.input}`}
                 autoFocus
               />
 
@@ -114,7 +114,7 @@ export function QuickMode({ onBack, onGenerate }: QuickModeProps) {
                   <Select
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
-                    className="w-full bg-slate-900 border-slate-800 text-slate-100"
+                    className="w-full bg-slate-900 border-slate-800 text-slate-100 focus:border-slate-400 focus:outline-none focus:ring-0 transition-colors duration-300"
                   >
                     <option value="">Select a role...</option>
                     <option value="expert">Expert advisor</option>

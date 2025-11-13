@@ -1,18 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
 import { platforms } from "@/lib/prompt-engine/platforms";
+import { requireAuth } from "@/lib/middleware/auth";
+import { checkRateLimit } from "@/lib/middleware/rateLimit";
+import { corsMiddleware, getCorsHeaders } from "@/lib/utils/cors";
+import { validateRequestSize } from "@/lib/middleware/requestSize";
+import { serverError } from "@/lib/utils/errors";
 
-// CORS headers for automation platforms
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
-export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders });
+export async function OPTIONS(request: NextRequest) {
+  const corsResponse = corsMiddleware(request);
+  return corsResponse || NextResponse.json({}, { headers: getCorsHeaders(request) });
 }
 
 export async function GET(request: NextRequest) {
+  // Handle CORS
+  const corsResponse = corsMiddleware(request);
+  if (corsResponse) {
+    return corsResponse;
+  }
+
+  // Check authentication
+  const authResult = await requireAuth(request);
+  if (!authResult.isAuthenticated) {
+    return authResult.response!;
+  }
+
+  // Check rate limit
+  const rateLimitResult = await checkRateLimit(request, "default");
+  if (!rateLimitResult.allowed) {
+    return rateLimitResult.response!;
+  }
+
+  // Validate request size (for GET requests, this is minimal)
+  const sizeCheck = await validateRequestSize(request, "platforms");
+  if (!sizeCheck.isValid) {
+    return sizeCheck.response!;
+  }
+
   try {
     const allPlatformConfigurations = platforms;
 
@@ -30,15 +53,8 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    return NextResponse.json(platformResponseStructure, { headers: corsHeaders });
+    return NextResponse.json(platformResponseStructure, { headers: getCorsHeaders(request) });
   } catch (error) {
-    console.error("Error retrieving platform configurations:", error);
-    return NextResponse.json(
-      { 
-        success: false,
-        error: "Failed to retrieve platforms" 
-      },
-      { status: 500, headers: corsHeaders }
-    );
+    return serverError("Failed to retrieve platforms", error);
   }
 }

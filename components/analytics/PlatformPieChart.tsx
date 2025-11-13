@@ -27,18 +27,18 @@ export function PlatformPieChart({ platformStats }: PlatformPieChartProps) {
   // Sort by usage count descending
   const sortedStats = [...platformStats].sort((a, b) => b.usageCount - a.usageCount);
 
-  // Color palette
+  // Minimalist slate color palette - subtle differentiation
   const colors = [
-    "hsl(var(--chart-1))",
-    "hsl(var(--chart-2))",
-    "hsl(var(--chart-3))",
-    "hsl(var(--chart-4))",
-    "hsl(var(--chart-5))",
-    "#8b5cf6",
-    "#ec4899",
-    "#f59e0b",
-    "#10b981",
-    "#06b6d4",
+    "#94a3b8", // slate-400
+    "#64748b", // slate-500
+    "#475569", // slate-600
+    "#334155", // slate-700
+    "#1e293b", // slate-800
+    "#7dd3fc", // subtle sky-300 accent
+    "#86efac", // subtle green-300 accent
+    "#cbd5e1", // slate-300
+    "#52525b", // zinc-600
+    "#71717a", // zinc-500
   ];
 
   // Calculate pie slices
