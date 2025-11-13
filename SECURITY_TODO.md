@@ -404,5 +404,55 @@ This document tracks all security improvements needed to bring Hermes up to prod
 
 ---
 
+## Optional Features (Low Priority)
+
+### API Keys Integration
+
+**Status**: Optional - App works fully without API keys  
+**Priority**: Low  
+**Current State**: App uses algorithmic enhancement (works without external APIs)
+
+**What API Keys Would Enable**:
+
+1. **Real AI-Powered Analysis**
+   - Use Claude/OpenAI APIs for deeper prompt insights
+   - AI-generated intent classification
+   - Context-aware prompt analysis
+   - **Benefit**: More accurate and nuanced prompt understanding
+
+2. **Accurate Token Counting**
+   - Integrate tiktoken library for platform-specific tokenization
+   - Replace current approximation (4 chars = 1 token)
+   - Get exact token counts per platform
+   - **Benefit**: Precise token usage tracking and cost calculation
+
+3. **Real Cost Calculation**
+   - Fetch actual pricing from OpenAI, Anthropic, etc. APIs
+   - Replace mock pricing table
+   - Real-time cost updates
+   - **Benefit**: Accurate cost estimation for users
+
+4. **Enhanced Suggestions**
+   - AI-generated improvement recommendations
+   - Context-aware enhancement suggestions
+   - Platform-specific optimization tips
+   - **Benefit**: Better prompt optimization guidance
+
+**Implementation Notes**:
+- Current enhancement is algorithmic and fully functional
+- API keys are **optional** - app works great without them
+- Can be added incrementally (start with token counting, then add AI analysis)
+- Would require: API key management, error handling for API failures, rate limiting for external APIs
+
+**When to Consider**:
+- When you want AI-powered features
+- When accurate token counting becomes important
+- When users request real cost calculations
+- When you want to differentiate from algorithmic-only tools
+
+**Reference**: See this section whenever discussing API keys or feature additions
+
+---
+
 **Status Tracking**: Update checkboxes as tasks are completed. Move completed items to a "Completed" section at the bottom if desired.
 

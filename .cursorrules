@@ -703,7 +703,7 @@ Use this section for task breakdown when working on features:
 
 **API Keys Status**: 
 - **Current**: App works fully without API keys (algorithmic enhancement)
-- **Optional**: API keys would enable real AI analysis, accurate token counting, real pricing
-- **Recommendation**: Can continue UI development, add API keys when ready for AI features
+- **Optional**: See "Optional Features" section in SECURITY_TODO.md for details
+- **Reference**: Check SECURITY_TODO.md "Optional Features" section when discussing API keys or new features
 
 **Note**: Update security.txt contact email before production deployment
