@@ -17,7 +17,7 @@ export function ModeSelection({ onSelectMode }: ModeSelectionProps) {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black p-4">
+    <div className="min-h-screen flex items-center justify-center bg-black p-4 relative" suppressHydrationWarning>
       <div className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
         {/* Quick Mode */}
         <motion.div
@@ -28,6 +28,7 @@ export function ModeSelection({ onSelectMode }: ModeSelectionProps) {
           onMouseEnter={() => setHoveredMode('quick')}
           onMouseLeave={() => setHoveredMode(null)}
           onClick={() => onSelectMode('quick')}
+          suppressHydrationWarning
         >
           {/* Subtle gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-slate-700/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -38,6 +39,7 @@ export function ModeSelection({ onSelectMode }: ModeSelectionProps) {
               className="mb-8"
               animate={mounted ? { scale: hoveredMode === 'quick' ? 1.1 : 1 } : { scale: 1 }}
               transition={{ duration: 0.2 }}
+              suppressHydrationWarning
             >
               <svg
                 className="w-20 h-20 md:w-24 md:h-24 text-slate-300"
@@ -84,6 +86,7 @@ export function ModeSelection({ onSelectMode }: ModeSelectionProps) {
             <motion.div
               className="mt-12 px-8 py-3 rounded-lg bg-slate-800 text-slate-200 text-sm font-medium"
               whileHover={mounted ? { backgroundColor: '#334155' } : undefined}
+              suppressHydrationWarning
             >
               Start Quick Mode →
             </motion.div>
@@ -99,6 +102,7 @@ export function ModeSelection({ onSelectMode }: ModeSelectionProps) {
           onMouseEnter={() => setHoveredMode('god')}
           onMouseLeave={() => setHoveredMode(null)}
           onClick={() => onSelectMode('god')}
+          suppressHydrationWarning
         >
           {/* Subtle gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-slate-700/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -109,6 +113,7 @@ export function ModeSelection({ onSelectMode }: ModeSelectionProps) {
               className="mb-8"
               animate={mounted ? { scale: hoveredMode === 'god' ? 1.1 : 1 } : { scale: 1 }}
               transition={{ duration: 0.2 }}
+              suppressHydrationWarning
             >
               <svg
                 className="w-20 h-20 md:w-24 md:h-24 text-slate-300"
@@ -161,6 +166,7 @@ export function ModeSelection({ onSelectMode }: ModeSelectionProps) {
             <motion.div
               className="mt-12 px-8 py-3 rounded-lg bg-slate-800 text-slate-200 text-sm font-medium"
               whileHover={mounted ? { backgroundColor: '#334155' } : undefined}
+              suppressHydrationWarning
             >
               Enter God Mode →
             </motion.div>

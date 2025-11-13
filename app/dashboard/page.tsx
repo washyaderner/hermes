@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ModeSelection } from "@/components/modes/ModeSelection";
+// ModeSelection removed - now on home page
 import { QuickMode } from "@/components/modes/QuickMode";
 import { GodMode } from "@/components/modes/GodMode";
 import { InputArea } from "@/components/prompt/InputArea";
