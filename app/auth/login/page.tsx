@@ -19,12 +19,14 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      // Login doesn't require CSRF (user not authenticated yet)
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ username, password }),
+        credentials: "include", // Include cookies for session
       });
 
       const data = await response.json();
