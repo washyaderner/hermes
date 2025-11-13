@@ -132,7 +132,8 @@ export default function DashboardPage() {
       // Merge active contexts for prompt enhancement
       const contextText = activeContexts.length > 0 ? mergeContexts(activeContexts) : undefined;
 
-      const response = await fetch("/api/enhance", {
+      const { fetchWithCsrf } = await import("@/lib/utils/csrf-client");
+      const response = await fetchWithCsrf("/api/enhance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -222,7 +223,9 @@ export default function DashboardPage() {
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      const { fetchWithCsrf, clearCsrfToken } = await import("@/lib/utils/csrf-client");
+      await fetchWithCsrf("/api/auth/logout", { method: "POST" });
+      clearCsrfToken(); // Clear CSRF token cache on logout
       router.push("/auth/login");
       router.refresh();
     } catch (error) {
