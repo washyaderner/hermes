@@ -5,54 +5,72 @@ import { getPlatformById } from "@/lib/prompt-engine/platforms";
 import { generateId } from "@/lib/utils";
 import { UserSettings, Tone, SecurityThreatLevel } from "@/types";
 import { processPromptSecurely } from "@/lib/security/sanitizer";
+import { requireAuth } from "@/lib/middleware/auth";
+import { checkRateLimit } from "@/lib/middleware/rateLimit";
+import { corsMiddleware, getCorsHeaders } from "@/lib/utils/cors";
+import { validateRequestSize, validateParsedBodySize } from "@/lib/middleware/requestSize";
+import { requireCsrfToken } from "@/lib/middleware/csrf";
+import { validationError, serverError, notFoundError } from "@/lib/utils/errors";
 
-// CORS headers for automation platforms
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
-export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders });
+export async function OPTIONS(request: NextRequest) {
+  const corsResponse = corsMiddleware(request);
+  return corsResponse || NextResponse.json({}, { headers: getCorsHeaders(request) });
 }
 
 export async function POST(request: NextRequest) {
+  // Handle CORS
+  const corsResponse = corsMiddleware(request);
+  if (corsResponse) {
+    return corsResponse;
+  }
+
+  // Check authentication
+  const authResult = await requireAuth(request);
+  if (!authResult.isAuthenticated) {
+    return authResult.response!;
+  }
+
+  // Check CSRF token
+  const csrfResult = await requireCsrfToken(request);
+  if (!csrfResult.isValid) {
+    return csrfResult.response!;
+  }
+
+  // Check rate limit
+  const rateLimitResult = await checkRateLimit(request, "enhance");
+  if (!rateLimitResult.allowed) {
+    return rateLimitResult.response!;
+  }
+
+  // Validate request size
+  const sizeCheck = await validateRequestSize(request, "enhance");
+  if (!sizeCheck.isValid) {
+    return sizeCheck.response!;
+  }
+
   try {
     const requestBody = await request.json();
+
+    // Validate parsed body size
+    const bodySizeCheck = validateParsedBodySize(requestBody, "enhance");
+    if (!bodySizeCheck.isValid) {
+      return bodySizeCheck.response!;
+    }
     const { prompt, platform: platformId, settings = {} } = requestBody;
 
     // Validate required fields
     if (!prompt || typeof prompt !== "string") {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Prompt is required and must be a string"
-        },
-        { status: 400, headers: corsHeaders }
-      );
+      return validationError("Prompt is required and must be a string");
     }
 
     if (!platformId || typeof platformId !== "string") {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Platform ID is required and must be a string"
-        },
-        { status: 400, headers: corsHeaders }
-      );
+      return validationError("Platform ID is required and must be a string");
     }
 
     // Retrieve platform configuration
     const platformConfigurationData = getPlatformById(platformId);
     if (!platformConfigurationData) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Platform with ID "${platformId}" not found`
-        },
-        { status: 404, headers: corsHeaders }
-      );
+      return notFoundError("Platform not found");
     }
 
     // Parse user settings with defaults
@@ -94,10 +112,10 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             success: false,
-            error: securityProcessing.error || "Security scan failed",
+            error: "Security scan failed",
             securityResult: securityProcessing.securityResult,
           },
-          { status: 400, headers: corsHeaders }
+          { status: 400, headers: getCorsHeaders(request) }
         );
       }
 
@@ -112,11 +130,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             success: false,
-            error: `Prompt blocked due to ${securityResult.threatLevel} security threat level`,
+            error: "Prompt blocked due to security threat level",
             securityResult,
             message: "Please review and modify your prompt to remove potentially harmful patterns",
           },
-          { status: 403, headers: corsHeaders }
+          { status: 403, headers: getCorsHeaders(request) }
         );
       }
 
@@ -217,15 +235,8 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    return NextResponse.json(analysisResponseStructure, { headers: corsHeaders });
+    return NextResponse.json(analysisResponseStructure, { headers: getCorsHeaders(request) });
   } catch (error) {
-    console.error("Error enhancing prompt:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to enhance prompt"
-      },
-      { status: 500, headers: corsHeaders }
-    );
+    return serverError("Failed to enhance prompt", error);
   }
 }

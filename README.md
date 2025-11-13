@@ -87,11 +87,35 @@ npm run dev
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
+### Environment Variables
+
+Create a `.env` file in the root directory (see `.env.example` for template):
+
+```bash
+# Required
+NODE_ENV=development
+SESSION_SECRET=your-session-secret-here-minimum-32-bytes
+ALLOWED_ORIGINS=http://localhost:3000
+
+# Optional (for production)
+# DATABASE_URL=postgresql://user:password@localhost:5432/hermes
+# REDIS_URL=redis://localhost:6379
+# OPENAI_API_KEY=your-openai-api-key
+# ANTHROPIC_API_KEY=your-anthropic-api-key
+```
+
+**Important**: 
+- Generate `SESSION_SECRET` using: `openssl rand -hex 32`
+- Set `ALLOWED_ORIGINS` to your production domain(s) in production
+- Never commit `.env` file to version control
+
 ### Authentication
 
-For this demo version, use these credentials:
+Default credentials:
 - **Username**: `russ`
-- **Password**: `password`
+- **Password**: `SecurePassword123!`
+
+**Note**: In production, implement proper user registration and password reset flows.
 
 ## Project Structure
 

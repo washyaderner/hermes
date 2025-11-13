@@ -8,10 +8,52 @@ import {
 import { analyzePrompt } from "@/lib/prompt-engine/analyzer";
 import { getPlatformById } from "@/lib/prompt-engine/platforms";
 import { Tone } from "@/types";
+import { requireAuth } from "@/lib/middleware/auth";
+import { checkRateLimit } from "@/lib/middleware/rateLimit";
+import { corsMiddleware, getCorsHeaders } from "@/lib/utils/cors";
+import { validateRequestSize, validateParsedBodySize } from "@/lib/middleware/requestSize";
+import { requireCsrfToken } from "@/lib/middleware/csrf";
+import { validationError, serverError } from "@/lib/utils/errors";
 
 export async function POST(request: NextRequest) {
+  // Handle CORS
+  const corsResponse = corsMiddleware(request);
+  if (corsResponse) {
+    return corsResponse;
+  }
+
+  // Check authentication
+  const authResult = await requireAuth(request);
+  if (!authResult.isAuthenticated) {
+    return authResult.response!;
+  }
+
+  // Check CSRF token
+  const csrfResult = await requireCsrfToken(request);
+  if (!csrfResult.isValid) {
+    return csrfResult.response!;
+  }
+
+  // Check rate limit
+  const rateLimitResult = await checkRateLimit(request, "enhance");
+  if (!rateLimitResult.allowed) {
+    return rateLimitResult.response!;
+  }
+
+  // Validate request size
+  const sizeCheck = await validateRequestSize(request, "enhance");
+  if (!sizeCheck.isValid) {
+    return sizeCheck.response!;
+  }
+
   try {
     const body = await request.json();
+
+    // Validate parsed body size
+    const bodySizeCheck = validateParsedBodySize(body, "enhance");
+    if (!bodySizeCheck.isValid) {
+      return bodySizeCheck.response!;
+    }
     const {
       prompt,
       platformId,
@@ -23,25 +65,16 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!prompt || typeof prompt !== "string") {
-      return NextResponse.json(
-        { error: "Prompt is required and must be a string" },
-        { status: 400 }
-      );
+      return validationError("Prompt is required and must be a string");
     }
 
     if (!platformId || typeof platformId !== "string") {
-      return NextResponse.json(
-        { error: "Platform ID is required" },
-        { status: 400 }
-      );
+      return validationError("Platform ID is required");
     }
 
     const platform = getPlatformById(platformId);
     if (!platform) {
-      return NextResponse.json(
-        { error: "Invalid platform ID" },
-        { status: 400 }
-      );
+      return validationError("Invalid platform ID");
     }
 
     // Analyze original prompt
@@ -98,22 +131,22 @@ export async function POST(request: NextRequest) {
       };
     });
 
-    return NextResponse.json({
-      success: true,
-      originalAnalysis,
-      enhancedPrompts,
-      metadata: {
-        platform: platform.name,
-        tone,
-        fewShotCount,
-        variationCount: enhancedPrompts.length,
-      },
-    });
-  } catch (error) {
-    console.error("Error enhancing prompt:", error);
+    const corsHeaders = getCorsHeaders(request);
     return NextResponse.json(
-      { error: "Failed to enhance prompt" },
-      { status: 500 }
+      {
+        success: true,
+        originalAnalysis,
+        enhancedPrompts,
+        metadata: {
+          platform: platform.name,
+          tone,
+          fewShotCount,
+          variationCount: enhancedPrompts.length,
+        },
+      },
+      { headers: corsHeaders }
     );
+  } catch (error) {
+    return serverError("Failed to enhance prompt", error);
   }
 }

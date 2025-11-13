@@ -7,12 +7,22 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("hermes_auth");
-    if (isAuthenticated) {
-      router.push("/dashboard");
-    } else {
-      router.push("/auth/login");
-    }
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("/api/auth/session");
+        const data = await response.json();
+
+        if (data.authenticated) {
+          router.push("/dashboard");
+        } else {
+          router.push("/auth/login");
+        }
+      } catch (error) {
+        router.push("/auth/login");
+      }
+    };
+
+    checkAuth();
   }, [router]);
 
   return (

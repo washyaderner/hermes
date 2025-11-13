@@ -49,6 +49,15 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
     }
   };
 
+  // Prompt engineering flow steps
+  const flowSteps = [
+    { id: 'prompt', label: 'Base Prompt', field: 'prompt', complete: prompt.trim() !== '' },
+    { id: 'role', label: 'Role', field: 'role', complete: isFieldComplete('role') },
+    { id: 'desires', label: 'Examples', field: 'desires', complete: isFieldComplete('desires') },
+    { id: 'constraints', label: 'Constraints', field: 'constraints', complete: isFieldComplete('constraints') },
+    { id: 'format', label: 'Format', field: 'format', complete: isFieldComplete('format') },
+  ];
+
   return (
     <motion.div
       className="h-screen bg-black overflow-hidden flex flex-col"
@@ -71,9 +80,9 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
       </div>
 
       {/* Main Content - Two Column Layout */}
-      <div className="flex-1 px-8 py-6" style={{ overflow: 'visible' }}>
-        <div className="max-w-7xl mx-auto h-full" style={{ overflow: 'visible' }}>
-          <div className="grid grid-cols-2 gap-8 h-full p-2">
+      <div className="flex-1 px-8 py-6 overflow-auto">
+        <div className="max-w-7xl mx-auto h-full">
+          <div className="grid grid-cols-2 gap-6 h-full">
             {/* Left Column - Single Large Prompt Card */}
             <motion.div
               className="bg-slate-900/50 border border-slate-800 rounded-sm p-6 flex flex-col relative"
@@ -81,31 +90,22 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
               animate={{
                 opacity: 1,
                 x: 0,
-                scale: focusedField === 'prompt' ? focusStates.scale.focused : focusedField ? focusStates.scale.neutral : focusStates.scale.neutral,
               }}
               whileHover={{
-                scale: 1.02,
                 boxShadow: shadows.cardHoverStrong,
-                borderColor: focusStates.border.focused,
-                z: 50
+                borderColor: focusStates.border.hover,
               }}
               transition={{ duration: animation.duration.normal, ease: animation.easing.smooth }}
             >
               <label className="block text-sm font-medium text-slate-300 mb-4">Original Prompt</label>
-              <motion.div
-                className="flex-1"
-                whileHover={{ scale: 1.005 }}
-                transition={{ duration: animation.duration.fast }}
-              >
-                <Textarea
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  onFocus={() => setFocusedField('prompt')}
-                  onBlur={() => setFocusedField(null)}
-                  placeholder="Enter your original prompt here..."
-                  className="h-full bg-black border-slate-700 text-slate-100 resize-none transition-all duration-300 hover:border-slate-600 hover:shadow-lg hover:shadow-slate-700/20"
-                />
-              </motion.div>
+              <Textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                onFocus={() => setFocusedField('prompt')}
+                onBlur={() => setFocusedField(null)}
+                placeholder="Enter your original prompt here..."
+                className="flex-1 bg-black border-slate-700 text-slate-100 resize-none transition-all duration-300 focus:border-slate-400 focus:outline-none focus:ring-0"
+              />
 
               {/* Helper text for prompt */}
               <AnimatePresence>
@@ -123,22 +123,65 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
               </AnimatePresence>
             </motion.div>
 
-            {/* Right Column - Configuration Options */}
-            <div className="flex flex-col space-y-4 overflow-y-auto overflow-x-visible pr-2 pb-4">
+            {/* Right Column - Flow Diagram + Configuration Options */}
+            <div className="flex flex-col space-y-4 overflow-y-auto pr-2 pb-4">
+              {/* Prompt Engineering Flow Diagram */}
+              <motion.div
+                className="bg-slate-900/50 border border-slate-800 rounded-sm p-5"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: animation.duration.normal }}
+              >
+                <h3 className="text-xs font-semibold text-slate-400 mb-4 uppercase tracking-wider">
+                  Prompt Engineering Flow
+                </h3>
+                <div className="flex items-center justify-between">
+                  {flowSteps.map((step, index) => (
+                    <div key={step.id} className="flex items-center">
+                      {/* Step indicator */}
+                      <div className="flex flex-col items-center">
+                        <motion.div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 ${
+                            step.complete
+                              ? 'bg-green-500/20 text-green-400 border-2 border-green-500/50'
+                              : focusedField === step.field
+                              ? 'bg-slate-700 text-slate-200 border-2 border-slate-500'
+                              : 'bg-slate-800 text-slate-500 border-2 border-slate-700'
+                          }`}
+                          animate={{
+                            scale: focusedField === step.field ? 1.1 : 1,
+                          }}
+                        >
+                          {step.complete ? '✓' : index + 1}
+                        </motion.div>
+                        <span className={`text-[10px] mt-1 transition-colors ${
+                          focusedField === step.field ? 'text-slate-300' : 'text-slate-600'
+                        }`}>
+                          {step.label}
+                        </span>
+                      </div>
+                      {/* Arrow connector */}
+                      {index < flowSteps.length - 1 && (
+                        <div className={`w-6 h-0.5 mx-1 transition-colors ${
+                          step.complete ? 'bg-green-500/30' : 'bg-slate-700'
+                        }`} />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+
               {/* Role */}
               <motion.div
-                className="bg-slate-900/50 border border-slate-800 rounded-sm p-5 relative"
+                className="bg-slate-900/50 border border-slate-800 rounded-sm p-5 relative transition-all duration-300"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{
                   opacity: focusedField && focusedField !== 'role' ? focusStates.opacity.unfocused : focusStates.opacity.focused,
-                  scale: focusedField === 'role' ? focusStates.scale.focused : focusedField ? focusStates.scale.unfocused : focusStates.scale.neutral,
                   x: 0,
                 }}
                 whileHover={{
-                  scale: 1.02,
                   boxShadow: shadows.cardHover,
-                  borderColor: focusStates.border.focused,
-                  z: 50
+                  borderColor: focusStates.border.hover,
                 }}
                 transition={{ duration: animation.duration.normal, ease: animation.easing.smooth, delay: 0.1 }}
               >
@@ -163,7 +206,7 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
                   onChange={(e) => setRole(e.target.value)}
                   onFocus={() => setFocusedField('role')}
                   onBlur={() => setFocusedField(null)}
-                  className="w-full bg-black border-slate-700 text-slate-100 transition-all duration-300 hover:border-slate-600 hover:shadow-lg hover:shadow-slate-700/20"
+                  className="w-full bg-black border-slate-700 text-slate-100 transition-all duration-300 focus:border-slate-400 focus:outline-none focus:ring-0"
                 >
                   <option value="">Select role...</option>
                   <option value="expert">Expert advisor</option>
@@ -191,18 +234,15 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
 
               {/* Desires */}
               <motion.div
-                className="bg-slate-900/50 border border-slate-800 rounded-sm p-5 relative"
+                className="bg-slate-900/50 border border-slate-800 rounded-sm p-5 relative transition-all duration-300"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{
                   opacity: focusedField && focusedField !== 'desires' ? focusStates.opacity.unfocused : focusStates.opacity.focused,
-                  scale: focusedField === 'desires' ? focusStates.scale.focused : focusedField ? focusStates.scale.unfocused : focusStates.scale.neutral,
                   x: 0,
                 }}
                 whileHover={{
-                  scale: 1.02,
                   boxShadow: shadows.cardHover,
-                  borderColor: focusStates.border.focused,
-                  z: 50
+                  borderColor: focusStates.border.hover,
                 }}
                 transition={{ duration: animation.duration.normal, ease: animation.easing.smooth, delay: 0.2 }}
               >
@@ -228,7 +268,7 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
                   onFocus={() => setFocusedField('desires')}
                   onBlur={() => setFocusedField(null)}
                   placeholder="Ideal output examples..."
-                  className="h-24 bg-black border-slate-700 text-slate-100 resize-none transition-all duration-300 hover:border-slate-600 hover:shadow-lg hover:shadow-slate-700/20"
+                  className="h-24 bg-black border-slate-700 text-slate-100 resize-none transition-all duration-300 focus:border-slate-400 focus:outline-none focus:ring-0"
                 />
 
                 {/* Helper text */}
@@ -249,18 +289,15 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
 
               {/* Constraints */}
               <motion.div
-                className="bg-slate-900/50 border border-slate-800 rounded-sm p-5 relative"
+                className="bg-slate-900/50 border border-slate-800 rounded-sm p-5 relative transition-all duration-300"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{
                   opacity: focusedField && focusedField !== 'constraints' ? focusStates.opacity.unfocused : focusStates.opacity.focused,
-                  scale: focusedField === 'constraints' ? focusStates.scale.focused : focusedField ? focusStates.scale.unfocused : focusStates.scale.neutral,
                   x: 0,
                 }}
                 whileHover={{
-                  scale: 1.02,
                   boxShadow: shadows.cardHover,
-                  borderColor: focusStates.border.focused,
-                  z: 50
+                  borderColor: focusStates.border.hover,
                 }}
                 transition={{ duration: animation.duration.normal, ease: animation.easing.smooth, delay: 0.3 }}
               >
@@ -286,7 +323,7 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
                   onFocus={() => setFocusedField('constraints')}
                   onBlur={() => setFocusedField(null)}
                   placeholder="What NOT to do..."
-                  className="h-24 bg-black border-slate-700 text-slate-100 resize-none transition-all duration-300 hover:border-slate-600 hover:shadow-lg hover:shadow-slate-700/20"
+                  className="h-24 bg-black border-slate-700 text-slate-100 resize-none transition-all duration-300 focus:border-slate-400 focus:outline-none focus:ring-0"
                 />
 
                 {/* Helper text */}
@@ -307,18 +344,15 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
 
               {/* Output Format */}
               <motion.div
-                className="bg-slate-900/50 border border-slate-800 rounded-sm p-5 relative"
+                className="bg-slate-900/50 border border-slate-800 rounded-sm p-5 relative transition-all duration-300"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{
                   opacity: focusedField && focusedField !== 'format' ? focusStates.opacity.unfocused : focusStates.opacity.focused,
-                  scale: focusedField === 'format' ? focusStates.scale.focused : focusedField ? focusStates.scale.unfocused : focusStates.scale.neutral,
                   x: 0,
                 }}
                 whileHover={{
-                  scale: 1.02,
                   boxShadow: shadows.cardHover,
-                  borderColor: focusStates.border.focused,
-                  z: 50
+                  borderColor: focusStates.border.hover,
                 }}
                 transition={{ duration: animation.duration.normal, ease: animation.easing.smooth, delay: 0.4 }}
               >
@@ -343,7 +377,7 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
                   onChange={(e) => setFormat(e.target.value)}
                   onFocus={() => setFocusedField('format')}
                   onBlur={() => setFocusedField(null)}
-                  className="w-full bg-black border-slate-700 text-slate-100 transition-all duration-300 hover:border-slate-600 hover:shadow-lg hover:shadow-slate-700/20"
+                  className="w-full bg-black border-slate-700 text-slate-100 transition-all duration-300 focus:border-slate-400 focus:outline-none focus:ring-0"
                 >
                   <option value="">Select format...</option>
                   <option value="xml">XML</option>
@@ -372,22 +406,29 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
                   )}
                 </AnimatePresence>
               </motion.div>
+
+              {/* Generate Button - Now inline with cards */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: animation.duration.normal, delay: 0.5 }}
+              >
+                <Button
+                  onClick={handleGenerate}
+                  disabled={!prompt.trim()}
+                  className="w-full h-16 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-slate-100 text-lg font-semibold shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  size="lg"
+                >
+                  <span className="flex items-center justify-center gap-3">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Generate Advanced Prompt
+                  </span>
+                </Button>
+              </motion.div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Footer with Generate Button */}
-      <div className="flex-shrink-0 px-8 py-6 border-t border-slate-800 bg-slate-950/50">
-        <div className="max-w-7xl mx-auto">
-          <Button
-            onClick={handleGenerate}
-            disabled={!prompt.trim()}
-            className="w-full bg-slate-800 hover:bg-slate-700 text-slate-100"
-            size="lg"
-          >
-            ⚙️ Generate Advanced Prompt
-          </Button>
         </div>
       </div>
     </motion.div>
