@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 interface ModeSelectionProps {
@@ -9,6 +9,12 @@ interface ModeSelectionProps {
 
 export function ModeSelection({ onSelectMode }: ModeSelectionProps) {
   const [hoveredMode, setHoveredMode] = useState<'quick' | 'god' | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch by only enabling animations after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black p-4">
@@ -17,7 +23,7 @@ export function ModeSelection({ onSelectMode }: ModeSelectionProps) {
         <motion.div
           className="relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900/50 to-black cursor-pointer group"
           style={{ minHeight: '70vh' }}
-          whileHover={{ scale: 1.02, borderColor: '#475569' }}
+          whileHover={mounted ? { scale: 1.02, borderColor: '#475569' } : undefined}
           transition={{ duration: 0.3 }}
           onMouseEnter={() => setHoveredMode('quick')}
           onMouseLeave={() => setHoveredMode(null)}
@@ -30,7 +36,7 @@ export function ModeSelection({ onSelectMode }: ModeSelectionProps) {
             {/* Icon */}
             <motion.div
               className="mb-8"
-              animate={{ scale: hoveredMode === 'quick' ? 1.1 : 1 }}
+              animate={mounted ? { scale: hoveredMode === 'quick' ? 1.1 : 1 } : { scale: 1 }}
               transition={{ duration: 0.2 }}
             >
               <svg
@@ -77,7 +83,7 @@ export function ModeSelection({ onSelectMode }: ModeSelectionProps) {
             {/* CTA */}
             <motion.div
               className="mt-12 px-8 py-3 rounded-lg bg-slate-800 text-slate-200 text-sm font-medium"
-              whileHover={{ backgroundColor: '#334155' }}
+              whileHover={mounted ? { backgroundColor: '#334155' } : undefined}
             >
               Start Quick Mode →
             </motion.div>
@@ -88,7 +94,7 @@ export function ModeSelection({ onSelectMode }: ModeSelectionProps) {
         <motion.div
           className="relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900/50 to-black cursor-pointer group"
           style={{ minHeight: '70vh' }}
-          whileHover={{ scale: 1.02, borderColor: '#475569' }}
+          whileHover={mounted ? { scale: 1.02, borderColor: '#475569' } : undefined}
           transition={{ duration: 0.3 }}
           onMouseEnter={() => setHoveredMode('god')}
           onMouseLeave={() => setHoveredMode(null)}
@@ -101,7 +107,7 @@ export function ModeSelection({ onSelectMode }: ModeSelectionProps) {
             {/* Icon */}
             <motion.div
               className="mb-8"
-              animate={{ scale: hoveredMode === 'god' ? 1.1 : 1 }}
+              animate={mounted ? { scale: hoveredMode === 'god' ? 1.1 : 1 } : { scale: 1 }}
               transition={{ duration: 0.2 }}
             >
               <svg
@@ -154,7 +160,7 @@ export function ModeSelection({ onSelectMode }: ModeSelectionProps) {
             {/* CTA */}
             <motion.div
               className="mt-12 px-8 py-3 rounded-lg bg-slate-800 text-slate-200 text-sm font-medium"
-              whileHover={{ backgroundColor: '#334155' }}
+              whileHover={mounted ? { backgroundColor: '#334155' } : undefined}
             >
               Enter God Mode →
             </motion.div>
