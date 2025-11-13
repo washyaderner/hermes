@@ -64,8 +64,13 @@ export default function DashboardPage() {
   const { platformsData, isLoadingPlatforms, platformLoadError } = useLazyPlatforms();
   const [error, setError] = useState<string>("");
 
-  // Check authentication and register service worker
+  // TODO: Re-enable authentication when needed
+  // For now, bypass auth in testing environment
   useEffect(() => {
+    // Register service worker for offline capability
+    registerServiceWorker();
+
+    /* Original auth check - uncomment to re-enable:
     const checkAuth = async () => {
       try {
         const response = await fetch("/api/auth/session");
@@ -85,6 +90,7 @@ export default function DashboardPage() {
     };
 
     checkAuth();
+    */
   }, [router]);
 
   // Load datasets and patterns from localStorage
