@@ -138,23 +138,50 @@ export default function DashboardPage() {
       // Merge active contexts for prompt enhancement
       const contextText = activeContexts.length > 0 ? mergeContexts(activeContexts) : undefined;
 
-      const { fetchWithCsrf } = await import("@/lib/utils/csrf-client");
-      const response = await fetchWithCsrf("/api/enhance", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt: currentPrompt,
-          platformId: selectedPlatform.id,
-          tone: settings.tone,
-          fewShotCount: settings.fewShotEnabled ? settings.fewShotCount : 0,
-          systemMessage: settings.systemMessageEnabled
-            ? settings.customSystemMessage
-            : undefined,
-          variationCount: 3,
-          datasetContent: selectedDataset?.content,
-          contextText,
-        }),
-      });
+      // In development, use regular fetch (auth/CSRF bypassed on server)
+      // In production, use fetchWithCsrf for CSRF protection
+      // Note: process.env.NODE_ENV is replaced at build time by Next.js
+      const isDevelopment = process.env.NODE_ENV === "development";
+      
+      let response: Response;
+      if (isDevelopment) {
+        // Development: auth and CSRF are bypassed on server, use regular fetch
+        response = await fetch("/api/enhance", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt: currentPrompt,
+            platformId: selectedPlatform.id,
+            tone: settings.tone,
+            fewShotCount: settings.fewShotEnabled ? settings.fewShotCount : 0,
+            systemMessage: settings.systemMessageEnabled
+              ? settings.customSystemMessage
+              : undefined,
+            variationCount: 3,
+            datasetContent: selectedDataset?.content,
+            contextText,
+          }),
+        });
+      } else {
+        // Production: use CSRF-protected fetch
+        const { fetchWithCsrf } = await import("@/lib/utils/csrf-client");
+        response = await fetchWithCsrf("/api/enhance", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt: currentPrompt,
+            platformId: selectedPlatform.id,
+            tone: settings.tone,
+            fewShotCount: settings.fewShotEnabled ? settings.fewShotCount : 0,
+            systemMessage: settings.systemMessageEnabled
+              ? settings.customSystemMessage
+              : undefined,
+            variationCount: 3,
+            datasetContent: selectedDataset?.content,
+            contextText,
+          }),
+        });
+      }
 
       const data = await response.json();
 
@@ -229,6 +256,14 @@ export default function DashboardPage() {
 
   const handleLogout = async () => {
     try {
+      // In development, auth is bypassed so logout isn't needed
+      // Just redirect to login page
+      if (process.env.NODE_ENV === "development") {
+        router.push("/auth/login");
+        router.refresh();
+        return;
+      }
+
       const { fetchWithCsrf, clearCsrfToken } = await import("@/lib/utils/csrf-client");
       await fetchWithCsrf("/api/auth/logout", { method: "POST" });
       clearCsrfToken(); // Clear CSRF token cache on logout
@@ -274,21 +309,17 @@ export default function DashboardPage() {
     setSelectedWizardMode(null);
   };
 
-  // Show mode selection if no mode selected
-  if (selectedWizardMode === null) {
-    return <ModeSelection onSelectMode={handleModeSelection} />;
-  }
-
-  // Show Quick Mode
+  // Show Quick Mode wizard if selected (accessible from dashboard)
   if (selectedWizardMode === 'quick') {
     return <QuickMode onBack={handleModeBack} onGenerate={handleGenerate} />;
   }
 
-  // Show God Mode
+  // Show God Mode wizard if selected (accessible from dashboard)
   if (selectedWizardMode === 'god') {
     return <GodMode onBack={handleModeBack} onGenerate={handleGenerate} />;
   }
 
+  // Show full dashboard interface (mode selection is now on home page)
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-surface">
       {/* Top Navigation */}

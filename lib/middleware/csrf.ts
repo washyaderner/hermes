@@ -122,6 +122,11 @@ export async function requireCsrfToken(
   isValid: boolean;
   response?: NextResponse;
 }> {
+  // Bypass CSRF in development mode for local testing
+  if (process.env.NODE_ENV === "development") {
+    return { isValid: true };
+  }
+
   // Only require CSRF for state-changing methods
   const stateChangingMethods = ["POST", "PUT", "PATCH", "DELETE"];
   if (!stateChangingMethods.includes(request.method)) {

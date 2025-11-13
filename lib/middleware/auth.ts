@@ -9,6 +9,14 @@ export async function requireAuth(
   username: string | null;
   response?: NextResponse;
 }> {
+  // Bypass authentication in development mode for local testing
+  if (process.env.NODE_ENV === "development") {
+    return {
+      isAuthenticated: true,
+      username: "dev-user",
+    };
+  }
+
   const session = await getSessionFromCookies();
 
   if (!session.isValid || !session.username) {
