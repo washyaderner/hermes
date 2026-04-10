@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-// ModeSelection removed - now on home page
 import { QuickMode } from "@/components/modes/QuickMode";
 import { GodMode } from "@/components/modes/GodMode";
 import { InputArea } from "@/components/prompt/InputArea";
@@ -17,6 +16,7 @@ import { DatasetManager } from "@/components/prompt/DatasetManager";
 import { ImportExportControls } from "@/components/settings/ImportExportControls";
 import { useHermesStore, createPromptHash } from "@/lib/store";
 import { analyzePrompt } from "@/lib/prompt-engine/analyzer";
+import { assembleFromQuickMode, assembleFromGodMode } from "@/lib/prompt-engine/enhancer";
 import { Platform, SuccessfulPromptPattern, Tone, PromptHistoryItem } from "@/types";
 import { generateId } from "@/lib/utils";
 import { useLazyPlatforms } from "@/lib/hooks/useLazyPlatforms";
@@ -30,9 +30,11 @@ import { DecisionTreeMode } from "@/components/decision-tree/DecisionTreeMode";
 
 export default function DashboardPage() {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [activeMode, setActiveMode] = useState<"single" | "batch" | "tree">("single");
   const [selectedWizardMode, setSelectedWizardMode] = useState<'quick' | 'god' | null>(null);
   const [isContextSidebarOpen, setIsContextSidebarOpen] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [patternEnhancedPrompt, setPatternEnhancedPrompt] = useState<string>("");
   const {
     currentPrompt,
@@ -60,46 +62,21 @@ export default function DashboardPage() {
     loadContextsFromStorage,
   } = useHermesStore();
 
-  // Use lazy loading hook for platforms
   const { platformsData, isLoadingPlatforms, platformLoadError } = useLazyPlatforms();
   const [error, setError] = useState<string>("");
 
-  // TODO: Re-enable authentication when needed
-  // For now, bypass auth in testing environment
   useEffect(() => {
-    // Register service worker for offline capability
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     registerServiceWorker();
+  }, []);
 
-    /* Original auth check - uncomment to re-enable:
-    const checkAuth = async () => {
-      try {
-        const response = await fetch("/api/auth/session");
-        const data = await response.json();
-
-        if (!data.authenticated) {
-          router.push("/auth/login");
-          return;
-        }
-
-        // Register service worker for offline capability
-        registerServiceWorker();
-      } catch (error) {
-        console.error("Auth check error:", error);
-        router.push("/auth/login");
-      }
-    };
-
-    checkAuth();
-    */
-  }, [router]);
-
-  // Load datasets and patterns from localStorage
   useEffect(() => {
     loadDatasetsFromStorage();
     loadSuccessfulPatternsFromStorage();
     loadPromptHistoryFromStorage();
-
-    // Load contexts from localStorage
     loadContextsFromStorage();
   }, [loadDatasetsFromStorage, loadSuccessfulPatternsFromStorage, loadPromptHistoryFromStorage, loadContextsFromStorage]);
 
@@ -119,15 +96,14 @@ export default function DashboardPage() {
     }
   }, [currentPrompt]);
 
-  // Handle enhance
   const handleEnhance = async () => {
     if (!currentPrompt) {
-      setError("Please enter a prompt first");
+      setError("Enter a prompt first");
       return;
     }
 
     if (!selectedPlatform) {
-      setError("Please select a platform");
+      setError("Select a platform");
       return;
     }
 
@@ -135,17 +111,11 @@ export default function DashboardPage() {
     setIsEnhancing(true);
 
     try {
-      // Merge active contexts for prompt enhancement
       const contextText = activeContexts.length > 0 ? mergeContexts(activeContexts) : undefined;
-
-      // In development, use regular fetch (auth/CSRF bypassed on server)
-      // In production, use fetchWithCsrf for CSRF protection
-      // Note: process.env.NODE_ENV is replaced at build time by Next.js
       const isDevelopment = process.env.NODE_ENV === "development";
-      
+
       let response: Response;
       if (isDevelopment) {
-        // Development: auth and CSRF are bypassed on server, use regular fetch
         response = await fetch("/api/enhance", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -163,7 +133,6 @@ export default function DashboardPage() {
           }),
         });
       } else {
-        // Production: use CSRF-protected fetch
         const { fetchWithCsrf } = await import("@/lib/utils/csrf-client");
         response = await fetchWithCsrf("/api/enhance", {
           method: "POST",
@@ -186,7 +155,6 @@ export default function DashboardPage() {
       const data = await response.json();
 
       if (data.success) {
-        // Store successful prompt patterns for each variation
         data.enhancedPrompts.forEach((enhancedPrompt: any) => {
           const { id, original, enhanced, platform, patternMetadata } = enhancedPrompt;
 
@@ -210,7 +178,6 @@ export default function DashboardPage() {
 
         setEnhancedPrompts(data.enhancedPrompts);
 
-        // Save to history
         const historyItem: PromptHistoryItem = {
           promptId: generateId(),
           originalText: currentPrompt,
@@ -221,14 +188,12 @@ export default function DashboardPage() {
         };
         addPromptHistoryItem(historyItem);
 
-        // Calculate average output quality
         const avgQuality =
           data.enhancedPrompts.reduce(
             (sum: number, p: any) => sum + p.qualityScore,
             0
           ) / data.enhancedPrompts.length;
 
-        // Calculate token optimization
         const originalTokens = data.originalAnalysis.tokenCount;
         const avgEnhancedTokens =
           data.enhancedPrompts.reduce(
@@ -251,28 +216,6 @@ export default function DashboardPage() {
       console.error("Enhancement error:", err);
     } finally {
       setIsEnhancing(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      // In development, auth is bypassed so logout isn't needed
-      // Just redirect to login page
-      if (process.env.NODE_ENV === "development") {
-        router.push("/auth/login");
-        router.refresh();
-        return;
-      }
-
-      const { fetchWithCsrf, clearCsrfToken } = await import("@/lib/utils/csrf-client");
-      await fetchWithCsrf("/api/auth/logout", { method: "POST" });
-      clearCsrfToken(); // Clear CSRF token cache on logout
-      router.push("/auth/login");
-      router.refresh();
-    } catch (error) {
-      console.error("Logout error:", error);
-      // Still redirect even if logout API fails
-      router.push("/auth/login");
     }
   };
 
@@ -304,67 +247,81 @@ export default function DashboardPage() {
     setSelectedWizardMode(null);
   };
 
-  const handleGenerate = (data: any) => {
-    console.log('Generate with data:', data);
+  const handleQuickGenerate = (data: any) => {
+    const assembled = assembleFromQuickMode(data);
+    useHermesStore.getState().setCurrentPrompt(assembled);
     setSelectedWizardMode(null);
   };
 
-  // Show Quick Mode wizard if selected (accessible from dashboard)
+  const handleGodGenerate = (data: any) => {
+    const assembled = assembleFromGodMode(data);
+    useHermesStore.getState().setCurrentPrompt(assembled);
+    setSelectedWizardMode(null);
+  };
+
+  // Keyboard shortcut: Cmd+Enter to enhance
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        if (currentPrompt && selectedPlatform && !isEnhancing) {
+          handleEnhance();
+        }
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [currentPrompt, selectedPlatform, isEnhancing]);
+
   if (selectedWizardMode === 'quick') {
-    return <QuickMode onBack={handleModeBack} onGenerate={handleGenerate} />;
+    return <QuickMode onBack={handleModeBack} onGenerate={handleQuickGenerate} />;
   }
 
-  // Show God Mode wizard if selected (accessible from dashboard)
   if (selectedWizardMode === 'god') {
-    return <GodMode onBack={handleModeBack} onGenerate={handleGenerate} />;
+    return <GodMode onBack={handleModeBack} onGenerate={handleGodGenerate} />;
   }
 
-  // Show full dashboard interface (mode selection is now on home page)
+  if (!mounted) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-surface">
+    <div className="min-h-screen bg-background" suppressHydrationWarning>
       {/* Top Navigation */}
       <nav className="border-b border-border bg-surface/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center text-xl">
-              ⚡
-            </div>
-            <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Hermes
-              </h1>
-              <p className="text-xs text-muted-foreground">
-                Prompt Optimization Platform
-              </p>
-            </div>
+            <h1
+              className="text-xl font-bold text-foreground cursor-pointer"
+              onClick={() => router.push("/")}
+            >
+              Hermes
+            </h1>
+            <span className="text-xs text-muted-foreground">Prompt Engineering</span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={() => router.push("/history")}>
-              📜 History
+              History
             </Button>
             <Button variant="ghost" size="sm" onClick={() => router.push("/templates")}>
-              📋 Templates
+              Templates
             </Button>
             <Button variant="ghost" size="sm" onClick={() => router.push("/workflows")}>
-              🔗 Workflows
+              Workflows
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsContextSidebarOpen(!isContextSidebarOpen)}
-              title="Context Manager"
               className={isContextSidebarOpen ? "bg-primary/10" : ""}
             >
-              🧠 Context {activeContexts.length > 0 && `(${activeContexts.length})`}
+              Context {activeContexts.length > 0 && `(${activeContexts.length})`}
             </Button>
             <Button variant="ghost" size="sm" onClick={() => router.push("/analytics")}>
-              📊 Analytics
+              Analytics
             </Button>
             <Button variant="ghost" size="sm" onClick={handleQuickExport} title="Export backup">
-              💾 Export
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              🚪 Logout
+              Export
             </Button>
           </div>
         </div>
@@ -377,23 +334,30 @@ export default function DashboardPage() {
           <Button
             variant={activeMode === "single" ? "default" : "outline"}
             onClick={() => setActiveMode("single")}
-            className="flex-1"
+            size="sm"
           >
-            ✨ Single Mode
+            Single
           </Button>
           <Button
             variant={activeMode === "batch" ? "default" : "outline"}
             onClick={() => setActiveMode("batch")}
-            className="flex-1"
+            size="sm"
           >
-            📦 Batch Mode
+            Batch
           </Button>
           <Button
             variant={activeMode === "tree" ? "default" : "outline"}
             onClick={() => setActiveMode("tree")}
-            className="flex-1"
+            size="sm"
           >
-            🌳 Decision Tree
+            Decision Tree
+          </Button>
+          <div className="flex-1" />
+          <Button variant="outline" size="sm" onClick={() => handleModeSelection('quick')}>
+            Quick Wizard
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => handleModeSelection('god')}>
+            God Mode
           </Button>
         </div>
 
@@ -403,103 +367,103 @@ export default function DashboardPage() {
           <DecisionTreeMode
             initialPrompt={currentPrompt}
             onPromptChange={(prompt) => {
-              // Update the current prompt in the store
-              const event = { target: { value: prompt } } as React.ChangeEvent<HTMLTextAreaElement>;
-              const textarea = document.querySelector('textarea[placeholder*="Enter your prompt"]') as HTMLTextAreaElement;
-              if (textarea) {
-                textarea.value = prompt;
-                textarea.dispatchEvent(new Event('input', { bubbles: true }));
-              }
+              useHermesStore.getState().setCurrentPrompt(prompt);
             }}
             onClose={() => setActiveMode("single")}
           />
         ) : (
           <>
-        {/* Quality Metrics Bar */}
-        <Card className="mb-6 border-primary/20">
-          <div className="p-6">
-            <div className="flex items-center justify-between gap-6">
-              <div className="flex items-center gap-6">
-                <QualityMeter
-                  score={qualityScores.input}
-                  label="Input Quality"
-                  size="md"
-                />
-                <div className="text-4xl text-muted-foreground">→</div>
-                <QualityMeter
-                  score={qualityScores.output}
-                  label="Output Quality"
-                  size="md"
-                />
-                {qualityScores.tokenOptimization > 0 && (
-                  <>
-                    <div className="text-4xl text-muted-foreground">•</div>
-                    <QualityMeter
-                      score={qualityScores.tokenOptimization}
-                      label="Token Saved"
-                      size="md"
+            {/* Quality Metrics Strip */}
+            <div className="mb-6 flex items-center gap-6 p-4 bg-surface/30 rounded-lg border border-border">
+              <QualityMeter score={qualityScores.input} label="Input" size="sm" />
+              <span className="text-muted-foreground">{"->"}</span>
+              <QualityMeter score={qualityScores.output} label="Output" size="sm" />
+              {qualityScores.tokenOptimization > 0 && (
+                <>
+                  <span className="text-muted-foreground">|</span>
+                  <QualityMeter score={qualityScores.tokenOptimization} label="Saved" size="sm" />
+                </>
+              )}
+              <div className="flex-1" />
+              <TokenCounter
+                text={currentPrompt}
+                maxTokens={selectedPlatform?.maxTokens}
+                model="gpt-4"
+              />
+            </div>
+
+            {/* Two-Column Layout: Input | Output */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left: Input + Controls */}
+              <div className="space-y-4">
+                {/* Platform + Enhance in one row */}
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <PlatformSelector platforms={platformsData} />
+                  </div>
+                  <Button
+                    onClick={handleEnhance}
+                    disabled={!currentPrompt || !selectedPlatform || isEnhancing}
+                    className="h-10 px-6 whitespace-nowrap"
+                    variant="accent"
+                  >
+                    {isEnhancing ? "Optimizing..." : "Enhance"}
+                  </Button>
+                </div>
+
+                {error && (
+                  <div className="text-sm text-red-400 bg-red-500/10 p-3 rounded-md border border-red-500/20">
+                    {error}
+                  </div>
+                )}
+
+                {/* Prompt Input */}
+                <InputArea />
+
+                {/* Keyboard hint */}
+                <div className="text-xs text-muted-foreground text-right">
+                  {typeof navigator !== "undefined" && navigator.platform?.includes("Mac") ? "Cmd" : "Ctrl"}+Enter to enhance
+                </div>
+
+                {/* Advanced Controls - Collapsible */}
+                <button
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="w-full text-left text-sm text-muted-foreground hover:text-foreground py-2 flex items-center gap-2 transition-colors"
+                >
+                  <span className={`transition-transform ${showAdvanced ? "rotate-90" : ""}`}>
+                    &#9654;
+                  </span>
+                  Advanced Settings
+                </button>
+
+                {showAdvanced && (
+                  <div className="space-y-4 border border-border rounded-lg p-4 bg-surface/20">
+                    <ControlPanel />
+                    <PlatformIntelligence
+                      currentPrompt={currentPrompt}
+                      selectedPlatform={selectedPlatform}
+                      availablePlatforms={platformsData}
+                      onPlatformSelect={setSelectedPlatform}
                     />
-                  </>
+                    <PatternLibrary
+                      currentPrompt={currentPrompt}
+                      detectedIntent={qualityScores.input > 0 ? analyzePrompt(currentPrompt).intent : "unknown"}
+                      onApplyPattern={handleApplyPattern}
+                    />
+                    <DatasetManager />
+                    <ImportExportControls />
+                  </div>
                 )}
               </div>
-              <div className="flex-1 max-w-md">
-                <TokenCounter
-                  text={currentPrompt}
-                  maxTokens={selectedPlatform?.maxTokens}
-                  model="gpt-4"
-                />
+
+              {/* Right: Output */}
+              <div>
+                <div className="sticky top-24">
+                  <OutputCards prompts={enhancedPrompts} />
+                </div>
               </div>
             </div>
-          </div>
-        </Card>
-
-        {/* Main Split View */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Side - Input */}
-          <div className="lg:col-span-1 space-y-6">
-            <PlatformSelector platforms={platformsData} />
-            <PlatformIntelligence
-              currentPrompt={currentPrompt}
-              selectedPlatform={selectedPlatform}
-              availablePlatforms={platformsData}
-              onPlatformSelect={setSelectedPlatform}
-            />
-            <PatternLibrary
-              currentPrompt={currentPrompt}
-              detectedIntent={qualityScores.input > 0 ? analyzePrompt(currentPrompt).intent : "unknown"}
-              onApplyPattern={handleApplyPattern}
-            />
-            <DatasetManager />
-            <ImportExportControls />
-            <ControlPanel />
-            <Button
-              onClick={handleEnhance}
-              disabled={!currentPrompt || !selectedPlatform || isEnhancing}
-              className="w-full h-12 text-lg"
-              variant="accent"
-            >
-              {isEnhancing ? "✨ Optimizing..." : "✨ Optimize Prompt"}
-            </Button>
-            {error && (
-              <div className="text-sm text-red-500 bg-red-500/10 p-3 rounded-md border border-red-500/20">
-                {error}
-              </div>
-            )}
-          </div>
-
-          {/* Middle - Input Area */}
-          <div className="lg:col-span-1">
-            <InputArea />
-          </div>
-
-          {/* Right Side - Output */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24">
-              <OutputCards prompts={enhancedPrompts} />
-            </div>
-          </div>
-        </div>
-        </>
+          </>
         )}
       </div>
 

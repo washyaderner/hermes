@@ -21,10 +21,16 @@ import { downloadTextReport, printHTMLReport } from "@/lib/analytics/pdf-export"
 
 export default function AnalyticsPage() {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const { promptHistory, promptHistoryItems } = useHermesStore();
   const [report, setReport] = useState<AnalyticsReport | null>(null);
   const [periodDays, setPeriodDays] = useState<number>(30);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Generate report on mount and when period changes
   useEffect(() => {
@@ -85,8 +91,13 @@ export default function AnalyticsPage() {
 
   const hasData = report.metrics.totalPrompts > 0;
 
+  // Prevent hydration mismatch by only rendering after mount
+  if (!mounted) {
+    return null;
+  }
+
   return (
-    <div className="container mx-auto p-6 max-w-7xl space-y-6">
+    <div className="container mx-auto p-6 max-w-7xl space-y-6" suppressHydrationWarning>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">

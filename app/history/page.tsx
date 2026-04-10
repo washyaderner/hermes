@@ -10,20 +10,19 @@ import { PromptHistoryItem } from "@/types";
 
 export default function HistoryPage() {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const { promptHistoryItems, loadPromptHistoryFromStorage, deletePromptHistoryItem, setCurrentPrompt, setSelectedPlatform } = useHermesStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPlatformFilter, setSelectedPlatformFilter] = useState<string | null>(null);
 
+  // Prevent hydration mismatch
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("hermes_auth");
-    if (!isAuthenticated) {
-      router.push("/auth/login");
-      return;
-    }
+    setMounted(true);
+  }, []);
 
-    // Load history from localStorage
+  useEffect(() => {
     loadPromptHistoryFromStorage();
-  }, [router, loadPromptHistoryFromStorage]);
+  }, [loadPromptHistoryFromStorage]);
 
   const filterHistoryByPlatform = (items: PromptHistoryItem[], platformId: string | null) => {
     if (!platformId) return items;
@@ -60,8 +59,13 @@ export default function HistoryPage() {
     }
   };
 
+  // Prevent hydration mismatch by only rendering after mount
+  if (!mounted) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-surface">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-surface" suppressHydrationWarning>
       <nav className="border-b border-border bg-surface/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">

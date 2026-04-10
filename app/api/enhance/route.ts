@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   enhancePrompt,
-  generateVariations,
   explainImprovements,
   calculateImprovement,
 } from "@/lib/prompt-engine/enhancer";
@@ -60,8 +59,9 @@ export async function POST(request: NextRequest) {
       tone = "professional",
       fewShotCount = 0,
       systemMessage,
-      variationCount = 2,
+      variationCount = 3,
       datasetContent,
+      contextText,
     } = body;
 
     if (!prompt || typeof prompt !== "string") {
@@ -80,23 +80,42 @@ export async function POST(request: NextRequest) {
     // Analyze original prompt
     const originalAnalysis = analyzePrompt(prompt);
 
-    // Generate variations with dataset context
+    // Generate distinct variations with different strategies
+    const baseOptions = { systemMessage, datasetContent, contextText };
     const variations: string[] = [];
-    for (let i = 0; i < variationCount; i++) {
-      const complexity = originalAnalysis.complexity;
-      const resolveAmbiguity = i >= 1; // Only resolve ambiguity for 2nd+ variations
-      const fewShots = i === 2 && complexity > 5 ? 2 : i === 1 && complexity > 7 ? 3 : fewShotCount;
-      const useTone = i === 2 ? "spartan" : tone;
 
-      const enhanced = enhancePrompt(prompt, platform, {
-        tone: useTone as Tone,
-        fewShotCount: fewShots,
-        resolveAmbiguity,
-        systemMessage,
-        datasetContent,
-      });
+    // Variation 1: Precise - structured, minimal additions
+    variations.push(
+      enhancePrompt(prompt, platform, {
+        ...baseOptions,
+        tone: tone as Tone,
+        fewShotCount: 0,
+        resolveAmbiguity: false,
+      })
+    );
 
-      variations.push(enhanced);
+    // Variation 2: Comprehensive - resolves ambiguity, adds context
+    if (variationCount >= 2) {
+      variations.push(
+        enhancePrompt(prompt, platform, {
+          ...baseOptions,
+          tone: tone as Tone,
+          fewShotCount: originalAnalysis.complexity > 5 ? 1 : 0,
+          resolveAmbiguity: true,
+        })
+      );
+    }
+
+    // Variation 3: Expert - full structure, examples, guardrails
+    if (variationCount >= 3) {
+      variations.push(
+        enhancePrompt(prompt, platform, {
+          ...baseOptions,
+          tone: "spartan" as Tone,
+          fewShotCount: originalAnalysis.complexity > 4 ? 2 : 1,
+          resolveAmbiguity: true,
+        })
+      );
     }
 
     // Analyze each variation and create response
@@ -109,8 +128,8 @@ export async function POST(request: NextRequest) {
       );
 
       // Determine enhancement type based on variation index
-      const enhancementType = index === 0 ? "conservative" : index === 1 ? "balanced" : "aggressive";
-      const usedFewShotCount = index === 2 && originalAnalysis.complexity > 5 ? 2 : index === 1 && originalAnalysis.complexity > 7 ? 3 : fewShotCount;
+      const enhancementType = index === 0 ? "precise" : index === 1 ? "comprehensive" : "expert";
+      const usedFewShotCount = index === 0 ? 0 : index === 1 ? (originalAnalysis.complexity > 5 ? 1 : 0) : (originalAnalysis.complexity > 4 ? 2 : 1);
 
       return {
         id: `variation-${index + 1}-${Date.now()}`,

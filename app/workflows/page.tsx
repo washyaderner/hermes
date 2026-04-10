@@ -10,25 +10,29 @@ import { loadWorkflowsFromStorage, loadWorkflowExecutionsFromStorage } from "@/l
 
 export default function WorkflowsPage() {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
   const [customWorkflows, setCustomWorkflows] = useState<Workflow[]>([]);
   const [executionCount, setExecutionCount] = useState(0);
 
+  // Prevent hydration mismatch
   useEffect(() => {
-    // Check authentication
-    const isAuthenticated = localStorage.getItem("hermes_auth");
-    if (!isAuthenticated) {
-      router.push("/auth/login");
-      return;
-    }
+    setMounted(true);
+  }, []);
 
+  useEffect(() => {
     // Load custom workflows and execution history
     setCustomWorkflows(loadWorkflowsFromStorage());
     setExecutionCount(loadWorkflowExecutionsFromStorage().length);
-  }, [router]);
+  }, []);
+
+  // Prevent hydration mismatch by only rendering after mount
+  if (!mounted) {
+    return null;
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-surface">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-surface" suppressHydrationWarning>
       {/* Navigation */}
       <nav className="border-b border-border bg-surface/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">

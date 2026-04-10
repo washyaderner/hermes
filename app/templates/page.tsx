@@ -10,20 +10,19 @@ import { SavedTemplate } from "@/types";
 
 export default function TemplatesPage() {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const { savedTemplates, loadSavedTemplatesFromStorage, deleteSavedTemplate, loadTemplateIntoDashboard } = useHermesStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string | null>(null);
 
+  // Prevent hydration mismatch
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("hermes_auth");
-    if (!isAuthenticated) {
-      router.push("/auth/login");
-      return;
-    }
+    setMounted(true);
+  }, []);
 
-    // Load templates from localStorage
+  useEffect(() => {
     loadSavedTemplatesFromStorage();
-  }, [router, loadSavedTemplatesFromStorage]);
+  }, [loadSavedTemplatesFromStorage]);
 
   const filterTemplatesByCategory = (templates: SavedTemplate[], category: string | null) => {
     if (!category) return templates;
@@ -63,8 +62,13 @@ export default function TemplatesPage() {
     }
   };
 
+  // Prevent hydration mismatch by only rendering after mount
+  if (!mounted) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-surface">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-surface" suppressHydrationWarning>
       <nav className="border-b border-border bg-surface/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">

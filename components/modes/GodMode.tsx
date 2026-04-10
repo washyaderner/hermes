@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Select } from '@/components/ui/select';
 import { animation, shadows, focusStates } from '@/lib/design-tokens';
 
 interface GodModeProps {
@@ -25,7 +24,6 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
   const [format, setFormat] = useState('');
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const selectRef = useRef<HTMLSelectElement>(null);
 
   const currentStep = steps[currentStepIndex];
 
@@ -34,11 +32,22 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
     setTimeout(() => {
       if (textareaRef.current) {
         textareaRef.current.focus();
-      } else if (selectRef.current) {
-        selectRef.current.focus();
       }
     }, 300);
   }, [currentStepIndex]);
+
+  // Global Enter key handler for non-textarea steps
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (document.activeElement?.tagName === 'TEXTAREA') return;
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleNext();
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [currentStepIndex, prompt]);
 
   // Handle Enter key navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -194,7 +203,9 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
 
                 <div className="flex items-center justify-between text-sm text-slate-500">
                   <span>💡 Be specific about what you want to achieve</span>
-                  <span>Press Enter to continue →</span>
+                  <button onClick={handleNext} className="hover:text-slate-300 transition-colors">
+                    Press Enter to continue →
+                  </button>
                 </div>
               </motion.div>
             )}
@@ -218,24 +229,36 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
                   </p>
                 </div>
 
-                <Select
-                  ref={selectRef}
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  className="w-full h-14 text-lg bg-slate-900/50 border-slate-800 text-slate-100 focus:border-slate-400 focus:outline-none focus:ring-0"
-                >
-                  <option value="">Select a role...</option>
-                  <option value="expert">Expert advisor</option>
-                  <option value="teacher">Teacher</option>
-                  <option value="developer">Senior developer</option>
-                  <option value="writer">Professional writer</option>
-                  <option value="analyst">Data analyst</option>
-                </Select>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { value: 'expert', label: 'Expert Advisor' },
+                    { value: 'teacher', label: 'Teacher' },
+                    { value: 'developer', label: 'Senior Developer' },
+                    { value: 'writer', label: 'Professional Writer' },
+                    { value: 'analyst', label: 'Data Analyst' },
+                  ].map((r) => (
+                    <button
+                      key={r.value}
+                      onClick={() => {
+                        setRole(r.value);
+                        setTimeout(handleNext, 200);
+                      }}
+                      className={`p-6 rounded-md border text-sm transition-all duration-200 ${
+                        role === r.value
+                          ? 'bg-slate-700 border-slate-600 text-slate-100'
+                          : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-300'
+                      }`}
+                    >
+                      {r.label}
+                    </button>
+                  ))}
+                </div>
 
                 <div className="flex items-center justify-between text-sm text-slate-500">
                   <span>💡 Optional - skip if not needed</span>
-                  <span>Press Enter to continue →</span>
+                  <button onClick={handleNext} className="hover:text-slate-300 transition-colors">
+                    Press Enter to skip →
+                  </button>
                 </div>
               </motion.div>
             )}
@@ -270,7 +293,9 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
 
                 <div className="flex items-center justify-between text-sm text-slate-500">
                   <span>💡 Optional - helps guide tone and style</span>
-                  <span>Press Enter to continue →</span>
+                  <button onClick={handleNext} className="hover:text-slate-300 transition-colors">
+                    Press Enter to continue →
+                  </button>
                 </div>
               </motion.div>
             )}
@@ -305,7 +330,9 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
 
                 <div className="flex items-center justify-between text-sm text-slate-500">
                   <span>💡 Optional - be explicit about what to avoid</span>
-                  <span>Press Enter to continue →</span>
+                  <button onClick={handleNext} className="hover:text-slate-300 transition-colors">
+                    Press Enter to continue →
+                  </button>
                 </div>
               </motion.div>
             )}
@@ -329,28 +356,40 @@ export function GodMode({ onBack, onGenerate }: GodModeProps) {
                   </p>
                 </div>
 
-                <Select
-                  ref={selectRef}
-                  value={format}
-                  onChange={(e) => setFormat(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  className="w-full h-14 text-lg bg-slate-900/50 border-slate-800 text-slate-100 focus:border-slate-400 focus:outline-none focus:ring-0"
-                >
-                  <option value="">Select format...</option>
-                  <option value="xml">XML</option>
-                  <option value="markdown">Markdown</option>
-                  <option value="javascript">JavaScript/JSON</option>
-                  <option value="twitter">Twitter Post</option>
-                  <option value="linkedin">LinkedIn Post</option>
-                  <option value="blog">Blog Post</option>
-                  <option value="research">Research Paper</option>
-                  <option value="conversational">Conversational</option>
-                  <option value="minimalist">Spartan/Minimalist</option>
-                </Select>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { value: 'xml', label: 'XML' },
+                    { value: 'markdown', label: 'Markdown' },
+                    { value: 'javascript', label: 'JavaScript/JSON' },
+                    { value: 'twitter', label: 'Twitter Post' },
+                    { value: 'linkedin', label: 'LinkedIn Post' },
+                    { value: 'blog', label: 'Blog Post' },
+                    { value: 'research', label: 'Research Paper' },
+                    { value: 'conversational', label: 'Conversational' },
+                    { value: 'minimalist', label: 'Spartan/Minimalist' },
+                  ].map((f) => (
+                    <button
+                      key={f.value}
+                      onClick={() => {
+                        setFormat(f.value);
+                        setTimeout(handleNext, 200);
+                      }}
+                      className={`p-4 rounded-md border text-sm transition-all duration-200 ${
+                        format === f.value
+                          ? 'bg-slate-700 border-slate-600 text-slate-100'
+                          : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-300'
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
 
                 <div className="flex items-center justify-between text-sm text-slate-500">
                   <span>💡 Optional - structures the response</span>
-                  <span>Press Enter to continue →</span>
+                  <button onClick={handleNext} className="hover:text-slate-300 transition-colors">
+                    Press Enter to skip →
+                  </button>
                 </div>
               </motion.div>
             )}

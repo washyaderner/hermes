@@ -10,24 +10,27 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#0a0014", // velvety black
-        surface: "#1a0f2e", // deep purple-black
+        background: "var(--background)",
+        surface: "var(--surface)",
+        foreground: "var(--foreground)",
         primary: {
-          DEFAULT: "#6b46c1", // dream purple
-          foreground: "#e2e8f0",
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)",
         },
         accent: {
-          DEFAULT: "#f97316", // molten core orange
-          foreground: "#e2e8f0",
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-foreground)",
         },
         muted: {
-          DEFAULT: "#64748b", // gray-purple
-          foreground: "#e2e8f0",
+          DEFAULT: "var(--muted)",
+          foreground: "var(--muted-foreground)",
         },
-        foreground: "#e2e8f0", // soft white
-        border: "#2d1f4a",
-        input: "#2d1f4a",
-        ring: "#6b46c1",
+        border: "var(--border)",
+        input: "var(--input)",
+        ring: "var(--ring)",
+        success: "var(--success)",
+        warning: "var(--warning)",
+        error: "var(--error)",
       },
       borderRadius: {
         lg: "0.75rem",
