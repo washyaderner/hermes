@@ -14,10 +14,31 @@ export default function Home() {
   const { setCurrentPrompt } = useHermesStore();
   const [selectedMode, setSelectedMode] = useState<'quick' | 'god' | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("/api/auth/session");
+        const data = await response.json();
+
+        if (!data.authenticated) {
+          router.push("/auth/login");
+          return;
+        }
+
+        setAuthChecked(true);
+      } catch (error) {
+        router.push("/auth/login");
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   const handleModeSelection = (mode: 'quick' | 'god') => {
     setSelectedMode(mode);
@@ -38,6 +59,14 @@ export default function Home() {
     setCurrentPrompt(assembled);
     router.push("/dashboard");
   };
+
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-primary text-2xl">Loading...</div>
+      </div>
+    );
+  }
 
   if (selectedMode === null) {
     return (

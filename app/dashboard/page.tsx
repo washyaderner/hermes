@@ -31,6 +31,7 @@ import { DecisionTreeMode } from "@/components/decision-tree/DecisionTreeMode";
 export default function DashboardPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const [activeMode, setActiveMode] = useState<"single" | "batch" | "tree">("single");
   const [selectedWizardMode, setSelectedWizardMode] = useState<'quick' | 'god' | null>(null);
   const [isContextSidebarOpen, setIsContextSidebarOpen] = useState(false);
@@ -70,8 +71,26 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    registerServiceWorker();
-  }, []);
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("/api/auth/session");
+        const data = await response.json();
+
+        if (!data.authenticated) {
+          router.push("/auth/login");
+          return;
+        }
+
+        setAuthChecked(true);
+        registerServiceWorker();
+      } catch (error) {
+        console.error("Auth check error:", error);
+        router.push("/auth/login");
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   useEffect(() => {
     loadDatasetsFromStorage();
@@ -281,8 +300,12 @@ export default function DashboardPage() {
     return <GodMode onBack={handleModeBack} onGenerate={handleGodGenerate} />;
   }
 
-  if (!mounted) {
-    return null;
+  if (!mounted || !authChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-primary text-2xl">Loading...</div>
+      </div>
+    );
   }
 
   return (
