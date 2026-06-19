@@ -1,0 +1,37 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e46]
+  - generic [ref=e47]:
+    - generic [ref=e49]:
+      - generic [ref=e50]:
+        - button "← Previous" [ref=e89] [cursor=pointer]
+        - heading "God Mode" [level=1] [ref=e52]
+        - generic [ref=e53]: 2 / 6
+      - generic [ref=e54]:
+        - generic [ref=e56]:
+          - generic [ref=e57]: ✓
+          - generic [ref=e58]: Base Prompt
+        - generic [ref=e61]:
+          - generic [ref=e62]: "2"
+          - generic [ref=e63]: Role
+        - generic [ref=e66]:
+          - generic [ref=e67]: "3"
+          - generic [ref=e68]: Examples
+        - generic [ref=e71]:
+          - generic [ref=e72]: "4"
+          - generic [ref=e73]: Constraints
+        - generic [ref=e76]:
+          - generic [ref=e77]: "5"
+          - generic [ref=e78]: Format
+    - generic [ref=e90]:
+      - generic [ref=e91]:
+        - heading "Choose a role" [level=2] [ref=e92]
+        - paragraph [ref=e93]: What perspective should the AI take? This helps set the expertise level.
+      - generic [ref=e94]:
+        - button "Expert Advisor" [ref=e95] [cursor=pointer]
+        - button "Teacher" [ref=e96] [cursor=pointer]
+        - button "Senior Developer" [ref=e97] [cursor=pointer]
+        - button "Professional Writer" [ref=e98] [cursor=pointer]
+        - button "Data Analyst" [ref=e99] [cursor=pointer]
+      - generic [ref=e100]:
+        - generic [ref=e101]: 💡 Optional - skip if not needed
+        - button "Press Enter to skip →" [ref=e102] [cursor=pointer]

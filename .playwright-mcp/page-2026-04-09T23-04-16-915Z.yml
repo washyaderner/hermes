@@ -1,0 +1,23 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - button "Advanced Dashboard" [ref=e4] [cursor=pointer]
+    - generic [ref=e6]:
+      - generic [ref=e9] [cursor=pointer]:
+        - img [ref=e11]
+        - heading "Quick Mode" [level=2] [ref=e13]
+        - paragraph [ref=e14]: Guided step-by-step flow to build your perfect prompt in seconds
+        - generic [ref=e15]:
+          - generic [ref=e18]: Simple 3-step process
+          - generic [ref=e21]: Smart defaults and suggestions
+          - generic [ref=e24]: Perfect for beginners
+        - generic [ref=e25]: Start Quick Mode
+      - generic [ref=e28] [cursor=pointer]:
+        - img [ref=e30]
+        - heading "God Mode" [level=2] [ref=e33]
+        - paragraph [ref=e34]: Full control panel with advanced prompt engineering capabilities
+        - generic [ref=e35]:
+          - generic [ref=e38]: Complete customization
+          - generic [ref=e41]: Advanced constraints and examples
+          - generic [ref=e44]: For power users
+        - generic [ref=e45]: Enter God Mode
+  - alert [ref=e46]

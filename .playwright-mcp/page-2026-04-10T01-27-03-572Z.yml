@@ -1,0 +1,115 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - generic [ref=e7]: ⚡
+          - generic [ref=e8]:
+            - heading "Hermes" [level=1] [ref=e9]
+            - paragraph [ref=e10]: Workflow Automation
+        - generic [ref=e11]:
+          - button "Dashboard" [ref=e12] [cursor=pointer]
+          - button "History" [ref=e13] [cursor=pointer]
+          - button "Templates" [ref=e14] [cursor=pointer]
+          - button "🔗 Workflows" [ref=e15] [cursor=pointer]
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - generic [ref=e19]:
+          - heading "🔗 Workflow Automation" [level=1] [ref=e20]
+          - paragraph [ref=e21]: Chain multiple AI platforms together to create powerful multi-step workflows
+        - generic [ref=e22]:
+          - generic [ref=e23]:
+            - generic [ref=e25]:
+              - generic [ref=e26]: 🎯
+              - heading "Multi-Platform Chains" [level=3] [ref=e27]
+            - paragraph [ref=e29]: Combine outputs from multiple AI platforms in sequence for powerful results
+          - generic [ref=e30]:
+            - generic [ref=e32]:
+              - generic [ref=e33]: ⚡
+              - heading "Pre-Built Templates" [level=3] [ref=e34]
+            - paragraph [ref=e36]: 6 ready-to-use workflow templates for common tasks like content creation and research
+          - generic [ref=e37]:
+            - generic [ref=e39]:
+              - generic [ref=e40]: 💾
+              - heading "Save Custom Workflows" [level=3] [ref=e41]
+            - paragraph [ref=e43]: Create and save your own workflows for repeated use across projects
+      - generic [ref=e45]:
+        - heading "🔗 Workflow Templates" [level=3] [ref=e47]:
+          - generic [ref=e48]: 🔗
+          - text: Workflow Templates
+        - generic [ref=e50]:
+          - generic [ref=e51] [cursor=pointer]:
+            - generic [ref=e55]:
+              - generic [ref=e56]: 📝
+              - generic [ref=e57]:
+                - heading "Content Pipeline" [level=3] [ref=e58]
+                - paragraph [ref=e59]: Content Creation
+            - generic [ref=e60]:
+              - paragraph [ref=e61]: Complete content creation from idea to polished article
+              - generic [ref=e62]: 3 steps
+          - generic [ref=e63] [cursor=pointer]:
+            - generic [ref=e67]:
+              - generic [ref=e68]: 🎬
+              - generic [ref=e69]:
+                - heading "Visual Story Creator" [level=3] [ref=e70]
+                - paragraph [ref=e71]: Creative
+            - generic [ref=e72]:
+              - paragraph [ref=e73]: From concept to visual story across video and images
+              - generic [ref=e74]: 3 steps
+          - generic [ref=e75] [cursor=pointer]:
+            - generic [ref=e79]:
+              - generic [ref=e80]: ⌨️
+              - generic [ref=e81]:
+                - heading "Code Documentation Suite" [level=3] [ref=e82]
+                - paragraph [ref=e83]: Development
+            - generic [ref=e84]:
+              - paragraph [ref=e85]: Complete code documentation from function to tests
+              - generic [ref=e86]: 3 steps
+          - generic [ref=e87] [cursor=pointer]:
+            - generic [ref=e91]:
+              - generic [ref=e92]: 📱
+              - generic [ref=e93]:
+                - heading "Social Media Blast" [level=3] [ref=e94]
+                - paragraph [ref=e95]: Marketing
+            - generic [ref=e96]:
+              - paragraph [ref=e97]: Transform one idea into multi-platform social content
+              - generic [ref=e98]: 3 steps
+          - generic [ref=e99] [cursor=pointer]:
+            - generic [ref=e103]:
+              - generic [ref=e104]: 📊
+              - generic [ref=e105]:
+                - heading "Research to Presentation" [level=3] [ref=e106]
+                - paragraph [ref=e107]: Business
+            - generic [ref=e108]:
+              - paragraph [ref=e109]: Transform raw research into polished presentation
+              - generic [ref=e110]: 3 steps
+          - generic [ref=e111] [cursor=pointer]:
+            - generic [ref=e115]:
+              - generic [ref=e116]: 🎯
+              - generic [ref=e117]:
+                - heading "Transcript to Social Summary" [level=3] [ref=e118]
+                - paragraph [ref=e119]: Productivity
+            - generic [ref=e120]:
+              - paragraph [ref=e121]: Transform meeting transcripts into shareable summaries
+              - generic [ref=e122]: 3 steps
+      - generic [ref=e123]:
+        - heading "💡 How Workflows Work" [level=3] [ref=e125]:
+          - generic [ref=e126]: 💡
+          - text: How Workflows Work
+        - generic [ref=e128]:
+          - generic [ref=e129]:
+            - generic [ref=e130]: "1"
+            - generic [ref=e131]:
+              - heading "Select a Template" [level=3] [ref=e132]
+              - paragraph [ref=e133]: Choose from pre-built workflows or create your own custom chain
+          - generic [ref=e134]:
+            - generic [ref=e135]: "2"
+            - generic [ref=e136]:
+              - heading "Provide Input Variables" [level=3] [ref=e137]
+              - paragraph [ref=e138]: Fill in required variables like topic, code, or sources for the workflow
+          - generic [ref=e139]:
+            - generic [ref=e140]: "3"
+            - generic [ref=e141]:
+              - heading "Execute and Review" [level=3] [ref=e142]
+              - paragraph [ref=e143]: Each step runs sequentially, passing outputs to the next platform in the chain

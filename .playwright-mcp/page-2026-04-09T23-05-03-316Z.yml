@@ -1,0 +1,33 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - button [ref=e5] [cursor=pointer]:
+          - img [ref=e6]
+        - generic [ref=e8]:
+          - heading "Analytics Dashboard" [level=1] [ref=e9]
+          - paragraph [ref=e10]: Insights from 3/10/2026 to 4/9/2026
+      - generic [ref=e11]:
+        - combobox [ref=e12]:
+          - option "Last 7 days"
+          - option "Last 30 days" [selected]
+          - option "Last 60 days"
+          - option "Last 90 days"
+        - button "Refresh" [ref=e13] [cursor=pointer]:
+          - img [ref=e14]
+          - text: Refresh
+        - button "JSON" [disabled]:
+          - img
+          - text: JSON
+        - button "Text" [disabled]:
+          - img
+          - text: Text
+        - button "Print/PDF" [disabled]:
+          - img
+          - text: Print/PDF
+    - generic [ref=e19]:
+      - generic [ref=e20]:
+        - heading "No Data Available" [level=3] [ref=e21]
+        - paragraph [ref=e22]: Start creating and enhancing prompts to see analytics data here.
+      - button "Go to Dashboard" [ref=e24] [cursor=pointer]
+  - alert [ref=e25]

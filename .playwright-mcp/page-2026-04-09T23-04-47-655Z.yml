@@ -1,0 +1,24 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - generic [ref=e7]: ⚡
+          - heading "Hermes" [level=1] [ref=e8]
+        - button "← Back to Dashboard" [ref=e9] [cursor=pointer]
+    - generic [ref=e11]:
+      - generic [ref=e12]:
+        - heading "📋 Prompt Templates (0 saved)" [level=3] [ref=e13]:
+          - generic [ref=e14]: 📋
+          - text: Prompt Templates
+          - generic [ref=e15]: (0 saved)
+        - paragraph [ref=e16]: Your saved prompt templates. Click to load into dashboard.
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - textbox "Search templates..." [ref=e19]
+          - button "All Categories" [ref=e21] [cursor=pointer]
+        - generic [ref=e22]:
+          - generic [ref=e23]: 📚
+          - heading "No Templates Yet" [level=3] [ref=e24]
+          - paragraph [ref=e25]: Save prompts as templates to reuse them later

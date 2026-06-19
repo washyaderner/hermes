@@ -1,0 +1,32 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e46]
+  - generic [ref=e47]:
+    - generic [ref=e49]:
+      - generic [ref=e50]:
+        - button "← Previous" [ref=e89] [cursor=pointer]
+        - heading "God Mode" [level=1] [ref=e52]
+        - generic [ref=e53]: 4 / 6
+      - generic [ref=e54]:
+        - generic [ref=e56]:
+          - generic [ref=e57]: ✓
+          - generic [ref=e58]: Base Prompt
+        - generic [ref=e61]:
+          - generic [ref=e62]: ✓
+          - generic [ref=e63]: Role
+        - generic [ref=e66]:
+          - generic [ref=e67]: "3"
+          - generic [ref=e68]: Examples
+        - generic [ref=e71]:
+          - generic [ref=e72]: "4"
+          - generic [ref=e73]: Constraints
+        - generic [ref=e76]:
+          - generic [ref=e77]: "5"
+          - generic [ref=e78]: Format
+    - generic [ref=e111]:
+      - generic [ref=e112]:
+        - heading "Set constraints" [level=2] [ref=e113]
+        - paragraph [ref=e114]: What should the AI avoid? Length limits, topics to skip, etc.
+      - textbox "What NOT to do..." [ref=e115]
+      - generic [ref=e116]:
+        - generic [ref=e117]: 💡 Optional - be explicit about what to avoid
+        - button "Press Enter to continue →" [ref=e118] [cursor=pointer]

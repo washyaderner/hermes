@@ -1,0 +1,42 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e46]
+  - generic [ref=e47]:
+    - generic [ref=e49]:
+      - generic [ref=e50]:
+        - button "← Previous" [ref=e89] [cursor=pointer]
+        - heading "God Mode" [level=1] [ref=e52]
+        - generic [ref=e53]: 6 / 6
+      - generic [ref=e54]:
+        - generic [ref=e56]:
+          - generic [ref=e57]: ✓
+          - generic [ref=e58]: Base Prompt
+        - generic [ref=e61]:
+          - generic [ref=e62]: ✓
+          - generic [ref=e63]: Role
+        - generic [ref=e66]:
+          - generic [ref=e67]: "3"
+          - generic [ref=e68]: Examples
+        - generic [ref=e71]:
+          - generic [ref=e72]: "4"
+          - generic [ref=e73]: Constraints
+        - generic [ref=e76]:
+          - generic [ref=e77]: ✓
+          - generic [ref=e78]: Format
+    - generic [ref=e136]:
+      - generic [ref=e137]:
+        - heading "Ready to generate" [level=2] [ref=e138]
+        - paragraph [ref=e139]: Review your configuration and generate your enhanced prompt.
+      - generic [ref=e140]:
+        - generic [ref=e141]:
+          - generic [ref=e142]: BASE PROMPT
+          - generic [ref=e143]: Write a blog post about AI prompt engineering best practices
+        - generic [ref=e144]:
+          - generic [ref=e145]: ROLE
+          - generic [ref=e146]: developer
+        - generic [ref=e147]:
+          - generic [ref=e148]: FORMAT
+          - generic [ref=e149]: blog
+      - button "Generate Advanced Prompt" [ref=e150] [cursor=pointer]:
+        - generic [ref=e151]:
+          - img [ref=e152]
+          - text: Generate Advanced Prompt

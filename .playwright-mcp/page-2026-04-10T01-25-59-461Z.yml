@@ -1,0 +1,32 @@
+- generic [ref=e1]:
+  - alert [ref=e46]
+  - generic [ref=e47]:
+    - generic [ref=e49]:
+      - generic [ref=e50]:
+        - button "← Back to mode selection" [ref=e51] [cursor=pointer]
+        - heading "God Mode" [level=1] [ref=e52]
+        - generic [ref=e53]: 1 / 6
+      - generic [ref=e54]:
+        - generic [ref=e56]:
+          - generic [ref=e57]: "1"
+          - generic [ref=e58]: Base Prompt
+        - generic [ref=e61]:
+          - generic [ref=e62]: "2"
+          - generic [ref=e63]: Role
+        - generic [ref=e66]:
+          - generic [ref=e67]: "3"
+          - generic [ref=e68]: Examples
+        - generic [ref=e71]:
+          - generic [ref=e72]: "4"
+          - generic [ref=e73]: Constraints
+        - generic [ref=e76]:
+          - generic [ref=e77]: "5"
+          - generic [ref=e78]: Format
+    - generic [ref=e81]:
+      - generic [ref=e82]:
+        - heading "What's your original prompt?" [level=2] [ref=e83]
+        - paragraph [ref=e84]: Start with your base prompt. We'll help you enhance it step by step.
+      - textbox "Enter your prompt here..." [active] [ref=e85]
+      - generic [ref=e86]:
+        - generic [ref=e87]: 💡 Be specific about what you want to achieve
+        - button "Press Enter to continue →" [ref=e88] [cursor=pointer]

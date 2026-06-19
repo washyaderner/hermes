@@ -1,0 +1,41 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e46]
+  - generic [ref=e47]:
+    - generic [ref=e49]:
+      - generic [ref=e50]:
+        - button "← Previous" [ref=e89] [cursor=pointer]
+        - heading "God Mode" [level=1] [ref=e52]
+        - generic [ref=e53]: 5 / 6
+      - generic [ref=e54]:
+        - generic [ref=e56]:
+          - generic [ref=e57]: ✓
+          - generic [ref=e58]: Base Prompt
+        - generic [ref=e61]:
+          - generic [ref=e62]: ✓
+          - generic [ref=e63]: Role
+        - generic [ref=e66]:
+          - generic [ref=e67]: "3"
+          - generic [ref=e68]: Examples
+        - generic [ref=e71]:
+          - generic [ref=e72]: "4"
+          - generic [ref=e73]: Constraints
+        - generic [ref=e76]:
+          - generic [ref=e77]: "5"
+          - generic [ref=e78]: Format
+    - generic [ref=e119]:
+      - generic [ref=e120]:
+        - heading "Choose output format" [level=2] [ref=e121]
+        - paragraph [ref=e122]: How should the response be structured?
+      - generic [ref=e123]:
+        - button "XML" [ref=e124] [cursor=pointer]
+        - button "Markdown" [ref=e125] [cursor=pointer]
+        - button "JavaScript/JSON" [ref=e126] [cursor=pointer]
+        - button "Twitter Post" [ref=e127] [cursor=pointer]
+        - button "LinkedIn Post" [ref=e128] [cursor=pointer]
+        - button "Blog Post" [ref=e129] [cursor=pointer]
+        - button "Research Paper" [ref=e130] [cursor=pointer]
+        - button "Conversational" [ref=e131] [cursor=pointer]
+        - button "Spartan/Minimalist" [ref=e132] [cursor=pointer]
+      - generic [ref=e133]:
+        - generic [ref=e134]: 💡 Optional - structures the response
+        - button "Press Enter to skip →" [ref=e135] [cursor=pointer]

@@ -1,0 +1,32 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e46]
+  - generic [ref=e47]:
+    - generic [ref=e49]:
+      - generic [ref=e50]:
+        - button "← Previous" [ref=e89] [cursor=pointer]
+        - heading "God Mode" [level=1] [ref=e52]
+        - generic [ref=e53]: 3 / 6
+      - generic [ref=e54]:
+        - generic [ref=e56]:
+          - generic [ref=e57]: ✓
+          - generic [ref=e58]: Base Prompt
+        - generic [ref=e61]:
+          - generic [ref=e62]: ✓
+          - generic [ref=e63]: Role
+        - generic [ref=e66]:
+          - generic [ref=e67]: "3"
+          - generic [ref=e68]: Examples
+        - generic [ref=e71]:
+          - generic [ref=e72]: "4"
+          - generic [ref=e73]: Constraints
+        - generic [ref=e76]:
+          - generic [ref=e77]: "5"
+          - generic [ref=e78]: Format
+    - generic [ref=e103]:
+      - generic [ref=e104]:
+        - heading "Provide examples" [level=2] [ref=e105]
+        - paragraph [ref=e106]: Show examples of ideal outputs to guide the AI's response style.
+      - textbox "Describe or paste ideal output examples..." [ref=e107]
+      - generic [ref=e108]:
+        - generic [ref=e109]: 💡 Optional - helps guide tone and style
+        - button "Press Enter to continue →" [ref=e110] [cursor=pointer]

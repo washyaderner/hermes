@@ -6,7 +6,16 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(gh auth:*)",
-      "Read(//Users/bruh/.config/**)"
+      "Read(//Users/bruh/.config/**)",
+      "Read(//var/folders/dt/y0ymn47923bf2r3c7s1k57000000gn/T/TemporaryItems/NSIRD_screencaptureui_XM5vUa/**)",
+      "Bash(git push:*)",
+      "Bash(cat:*)",
+      "Read(//var/folders/dt/y0ymn47923bf2r3c7s1k57000000gn/T/TemporaryItems/NSIRD_screencaptureui_ahC6K9/**)",
+      "Bash(lsof:*)",
+      "Bash(kill:*)",
+      "Bash(npm run dev:*)",
+      "Read(//var/folders/dt/y0ymn47923bf2r3c7s1k57000000gn/T/TemporaryItems/NSIRD_screencaptureui_jrHJTD/**)",
+      "Read(//var/folders/dt/y0ymn47923bf2r3c7s1k57000000gn/T/TemporaryItems/NSIRD_screencaptureui_dYLdFs/**)"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,137 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - heading "Hermes" [level=1] [ref=e7] [cursor=pointer]
+          - generic [ref=e8]: Prompt Engineering
+        - generic [ref=e9]:
+          - button "History" [ref=e10] [cursor=pointer]
+          - button "Templates" [ref=e11] [cursor=pointer]
+          - button "Workflows" [ref=e12] [cursor=pointer]
+          - button "Context" [ref=e13] [cursor=pointer]
+          - button "Analytics" [ref=e14] [cursor=pointer]
+          - button "Export" [ref=e15] [cursor=pointer]
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - button "Single" [ref=e18] [cursor=pointer]
+        - button "Batch" [ref=e19] [cursor=pointer]
+        - button "Decision Tree" [ref=e20] [cursor=pointer]
+        - button "Quick Wizard" [ref=e22] [cursor=pointer]
+        - button "God Mode" [ref=e23] [cursor=pointer]
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - generic [ref=e26]:
+            - img [ref=e27]
+            - generic [ref=e31]:
+              - generic [ref=e32]: "0"
+              - generic [ref=e33]: / 100
+          - generic [ref=e34]: Input
+        - generic [ref=e35]: "->"
+        - generic [ref=e36]:
+          - generic [ref=e37]:
+            - img [ref=e38]
+            - generic [ref=e42]:
+              - generic [ref=e43]: "0"
+              - generic [ref=e44]: / 100
+          - generic [ref=e45]: Output
+        - generic [ref=e46]:
+          - generic [ref=e47]:
+            - generic [ref=e48]: 🔢
+            - generic [ref=e49]:
+              - generic [ref=e50]: "0"
+              - generic [ref=e51]: tokens
+          - generic [ref=e53]:
+            - generic [ref=e54]: $0.00
+            - generic [ref=e55]: est. cost
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - generic [ref=e58]:
+            - generic [ref=e60]:
+              - generic [ref=e61]:
+                - generic [ref=e62]: Category
+                - combobox [ref=e63]:
+                  - option "All Platforms (39)" [selected]
+                  - option "AI Chat (5)"
+                  - option "Image Generation (3)"
+                  - option "AI Workflow (2)"
+                  - option "Video Generation (5)"
+                  - option "Audio Generation (2)"
+                  - option "AI Search (1)"
+                  - option "AI Research (1)"
+                  - option "AI Code (1)"
+                  - option "AI Platform (1)"
+                  - option "Design AI (1)"
+                  - option "Presentation AI (1)"
+                  - option "Productivity AI (1)"
+                  - option "Content AI (1)"
+                  - option "Video AI (2)"
+                  - option "Video Editing AI (2)"
+                  - option "Image Editing AI (1)"
+                  - option "Automation (2)"
+                  - option "Data Extraction (1)"
+                  - option "Social Media AI (4)"
+                  - option "Meeting AI (1)"
+                  - option "Forms AI (1)"
+              - generic [ref=e64]:
+                - generic [ref=e65]: Target Platform
+                - combobox [ref=e66]:
+                  - option "Select a platform..." [disabled] [selected]
+                  - option "🤖 Claude (Anthropic)"
+                  - option "💬 ChatGPT (OpenAI)"
+                  - option "✨ Gemini (Google)"
+                  - option "🔍 DeepSeek"
+                  - option "🚀 Grok (X.AI)"
+                  - option "🎨 Midjourney"
+                  - option "📐 Ideogram"
+                  - option "🖼️ Leonardo AI"
+                  - option "⚡ Glif"
+                  - option "🍌 Nano Banana"
+                  - option "🎬 Kling AI"
+                  - option "🎥 Runway"
+                  - option "📹 Pika AI"
+                  - option "💫 Luma Dream Machine"
+                  - option "👤 HeyGen"
+                  - option "🎵 Suno"
+                  - option "🎙️ ElevenLabs"
+                  - option "🔎 Perplexity AI"
+                  - option "📓 NotebookLM"
+                  - option "⌨️ Cursor"
+                  - option "🤗 Hugging Face"
+                  - option "🎨 Canva AI"
+                  - option "📊 Gamma"
+                  - option "📝 Notion AI"
+                  - option "✍️ Jasper"
+                  - option "🎬 Synthesia"
+                  - option "🎬 Descript"
+                  - option "🖼️ Remove.bg"
+                  - option "✂️ CapCut"
+                  - option "🔧 Make.com"
+                  - option "🔄 n8n"
+                  - option "🕷️ Apify"
+                  - option "📱 Buffer AI"
+                  - option "🐦 TweetHunter"
+                  - option "🔥 Hypefury"
+                  - option "📸 Flick"
+                  - option "🎬 Opus Clip"
+                  - option "🎯 Fathom"
+                  - option "📋 Typeform AI"
+            - button "Enhance" [disabled]
+          - generic [ref=e67]:
+            - generic [ref=e68]:
+              - heading "Input Prompt" [level=2] [ref=e69]
+              - paragraph [ref=e70]: Enter your prompt or use a wizard to build one
+            - 'textbox "Type your prompt here, or use Quick/God Mode to build one... Examples: Write a blog post about remote work productivity Build a REST API for user authentication Analyze the competitive landscape for AI dev tools" [ref=e72]':
+              - /placeholder: "Type your prompt here, or use Quick/God Mode to build one...  Examples: Write a blog post about remote work productivity Build a REST API for user authentication Analyze the competitive landscape for AI dev tools"
+            - generic [ref=e74]:
+              - generic [ref=e75]: Real-time analysis as you type
+              - generic [ref=e76]: 0 characters
+          - generic [ref=e77]: Cmd+Enter to enhance
+          - button "▶ Advanced Settings" [ref=e78] [cursor=pointer]:
+            - generic [ref=e79]: ▶
+            - text: Advanced Settings
+        - generic [ref=e83]:
+          - generic [ref=e84]: ✨
+          - heading "No Enhanced Prompts Yet" [level=3] [ref=e85]
+          - paragraph [ref=e86]: Enter a prompt and select a platform to see optimized variations appear here

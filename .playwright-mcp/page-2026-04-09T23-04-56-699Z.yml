@@ -1,0 +1,24 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - generic [ref=e7]: ⚡
+          - heading "Hermes" [level=1] [ref=e8]
+        - button "← Back to Dashboard" [ref=e9] [cursor=pointer]
+    - generic [ref=e11]:
+      - generic [ref=e12]:
+        - heading "📜 Prompt History (0/20)" [level=3] [ref=e13]:
+          - generic [ref=e14]: 📜
+          - text: Prompt History
+          - generic [ref=e15]: (0/20)
+        - paragraph [ref=e16]: Last 20 prompts optimized. Click to load back into dashboard.
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - textbox "Search prompts..." [ref=e19]
+          - button "All Platforms" [ref=e21] [cursor=pointer]
+        - generic [ref=e22]:
+          - generic [ref=e23]: 📭
+          - heading "No History Yet" [level=3] [ref=e24]
+          - paragraph [ref=e25]: Start optimizing prompts to build your history

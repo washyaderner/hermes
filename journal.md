@@ -9,3 +9,24 @@
 **Signal:** Positive - zero corrections, immediate /md request for summary doc
 **Friction:** Session disconnected mid-build (login required). No context lost because all files were already read. Port conflict on dev server test (3847 in use).
 **Carries forward:** No commits made yet (changes are local). Ship when ready. Consider adding real AI API integration (Claude/OpenAI) as the enhancement engine is still algorithmic - but it's dramatically better algorithmic now.
+
+## 2026-04-09 | SHIP | 024a331..352158e
+
+Shipped: Full UI revamp with interaction fixes - broken wizard navigation, auth gate removal, button grid conversion
+Commits: 1 since last ship
+Key changes:
+- Replaced native <select> dropdowns with clickable button grids on role/format steps (both Quick and God modes)
+- Added global Enter key handler + made all hint text clickable - every step navigable by click or keyboard
+- Removed auth gate on workflows page, added hydration mismatch prevention
+- Included full revamp: unified theme system, 8-stage enhancement engine, design token architecture
+
+
+## 2026-05-03 11:38 | 81367cf
+
+chore(gitignore): exclude .claude/settings.local.json (audit 2026-05-03)
+
+
+## 2026-05-03 21:27 | 93e0eb3
+
+fix(auth): re-enable authentication on root and dashboard pages
+
